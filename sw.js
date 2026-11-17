@@ -1,7 +1,7 @@
 // MCQ Vault offline copy: keeps the app on this device so it opens with no internet.
 // The page itself is fetched fresh when online (so updates arrive), and taken from this cache when offline.
 // Calls to the Apps Script server are never cached: they go straight to the network.
-const CACHE = 'mcqvault-app-v47';
+const CACHE = 'mcqvault-app-v47b';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 const LIBS = ['https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js',
   'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js',

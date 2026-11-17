@@ -3815,7 +3815,7 @@ async function authOtp(){const e=(($('#au-e')||{}).value||'').trim();AUTH.err=''
 /* ================= the Admin tab ================= */
 const Admin=(()=>{
   const A={tab:'over',data:null,loading:false,err:'',q:'',f:'all',notes:null,reps:null};
-  async function load(force){if(A.loading||(!force&&A.data))return;if(!S.on){A.err='offline';return}A.loading=true;A.err='';
+  async function load(force){if(A.loading||(!force&&A.data))return;if(!S.on){A.loading=true;A.err='';try{await reconnect()}catch(e){}A.loading=false;if(!S.on){A.err=S.syncErr&&!isNetErr(S.syncErr)?(cleanErr(S.syncErr)||'error'):'offline';if(S.view==='admin')softRender();return}}A.loading=true;A.err='';
     try{const [d,n,r]=await Promise.all([gas('adm_users',{}),gas('notes_list',{all:1}),gas('rep_list',{all:1})]);A.data=d;A.notes=n.list||[];A.reps=r.list||[];if(ME){ME.rp=A.reps.filter(o=>o.st!=='done').length;try{renderTabs()}catch(e){}}}catch(e){A.err=cleanErr(e)||e.code||'error'}
     A.loading=false;if(S.view==='admin')softRender()}
   const users=()=>(A.data&&A.data.list)||[];
@@ -3830,7 +3830,7 @@ const Admin=(()=>{
       <div class="seg admtabs" role="group" aria-label="Admin sections">${tabs.map(([k,l])=>`<label><input type="radio" name="admtab" data-ad="admTab" data-k="${k}" ${A.tab===k?'checked':''}><span>${l}${k==='req'&&reqWaiting().length?` <span class="pill warn">${reqWaiting().length}</span>`:''}${k==='rep'&&repN()?` <span class="pill warn">${repN()}</span>`:''}</span></label>`).join('')}</div>`;
     if(A.tab==='req')return head+vReq();
     if(A.tab==='books')return head+vBooks();
-    if(!A.data)return head+(A.err?`<div class="notice bad">${A.err==='offline'?'The Admin page needs an internet connection.':'Could not load: '+esc(A.err)} <button class="linkbtn" data-ad="admReload">Try again</button></div>`:`<p class="muted">Loading…</p>`);
+    if(!A.data)return head+(A.err?`<div class="notice bad">${A.err==='offline'?`<span>The Admin page needs an internet connection.</span>${S.syncErr&&S.syncErr.message?` <span class="small muted" data-notr>(${esc(String(S.syncErr.message).slice(0,160))})</span>`:''}`:'Could not load: '+esc(A.err)} <button class="linkbtn" data-ad="admReload">Try again</button></div>`:`<p class="muted">Loading…</p>`);
     return head+(A.tab==='users'?vUsers():A.tab==='admins'?vAdmins():A.tab==='notes'?vNotes():A.tab==='rep'?vRep():A.tab==='cfg'?vCfg():vOver())}
   const AIV={fix:['bad','Fix needed'],ok:['ok','The app matches the book'],unsure:['warn','Not sure']};
   function repFull(r){const q=r.fq;if(!q||!q.s)return r.q?`<p class="small" style="margin:6px 0 0"><b data-notr>${esc(r.q.bn)}${r.q.num?' · Q'+esc(r.q.num):''}</b>${r.q.a?` <span class="muted">Answer in the app:</span> <b data-notr>${esc(r.q.a)}</b>`:''}<br><span class="muted" data-notr>${esc(r.q.s)}</span></p>`:'';
@@ -4346,12 +4346,13 @@ async function boot(){
   setInterval(async()=>{if(S.on&&!document.hidden&&S.view!=='quiz'&&S.view!=='import'&&await readerCheck()){S.depAutoRan=false;depAuto()}},20*60000);
   if(!M.goals.length&&(S.on||!Cloud.mode)){await writeGoal(GOAL_DEF,true);softRender()}
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&isExam(S.active)){S.active.away=(S.active.away||0)+1;kvPut('active',S.active)}if(document.hidden){flush();if(S.activeOut)syncActive()}else if(S.on){pull(false);syncActive()}});
-  setInterval(()=>{if(S.on&&!document.hidden)syncActive()},15000);
+  let LASTIN=Date.now(),IDLE_N=0;const idleFor=ms=>Date.now()-LASTIN>ms;['pointerdown','keydown','touchstart','wheel'].forEach(ev=>addEventListener(ev,()=>{const was=idleFor(120000);LASTIN=Date.now();if(was&&S.on&&!document.hidden){pull(false);syncActive()}},{passive:true,capture:true}));
+  setInterval(()=>{IDLE_N++;if(S.on&&!document.hidden&&(!idleFor(120000)||IDLE_N%4===0))syncActive()},15000);
   addEventListener('pagehide',()=>flush());
   addEventListener('online',()=>{S.retry=0;S.outRetry=0;setSync();scheduleFlush(300);scheduleOut(1200);if(S.on){pull(false);syncActive();Focus.sync()}});
   addEventListener('offline',()=>setSync());
   setInterval(()=>{if(S.pending.size&&!S.flushing)flush();else if((S.outbox||[]).length)flushOut()},45000);
-  setInterval(()=>{if(S.on&&!document.hidden&&S.view!=='quiz')pull(false)},20000);
+  setInterval(()=>{if(S.on&&!document.hidden&&S.view!=='quiz'&&(!idleFor(120000)||IDLE_N%8===0))pull(false)},20000);
   setInterval(reconnect,20000);addEventListener('online',reconnect);
   setInterval(()=>{if(S.on&&!document.hidden)reconcile()},15*60000);
   try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
