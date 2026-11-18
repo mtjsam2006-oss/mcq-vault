@@ -976,7 +976,7 @@ const I18N=(()=>{
 "Tour and tips for users (how to use the app)":"الجولة والنصائح للمستخدمين (كيفية استخدام التطبيق)",
 "Every question you got wrong is kept here. It comes back after 1, 3 and 7 days, until you answer it right four times.":"كل سؤال أخطأت فيه يُحفظ هنا. يعود بعد 1 و3 و7 أيام، حتى تجيب عنه صحيحًا أربع مرات.",
 "Your answers by day, by book and by topic. Open Topics to find what to revise first.":"إجاباتك حسب اليوم والكتاب والموضوع. افتح «المواضيع» لتعرف ما تراجعه أولًا.",
-"These are the books of your specialty. Open a book to see its chapters and questions.":"هذه كتب تخصصك. افتح كتابًا لترى فصوله وأسئلته.",
+"These are the books of your specialty. Their questions are in Study.":"هذه كتب تخصصك. أسئلتها موجودة في قسم الدراسة.",
 "Deep Focus keeps your saved questions, your textbooks and your notebook, for revising one topic deeply.":"«التركيز العميق» يحفظ أسئلتك المحفوظة وكتبك الدراسية ودفترك، لمراجعة موضوع واحد بعمق.",
 "Is a book missing? Upload its file here and an admin adds it for you.":"هل ينقصك كتاب؟ ارفع ملفه هنا وسيضيفه أحد المشرفين لك.",
 "Your plan, its end date and the prices are here. Request a plan, then pay an admin.":"خطتك وتاريخ انتهائها والأسعار هنا. اطلب خطة ثم ادفع لأحد المشرفين.",
@@ -3542,7 +3542,7 @@ async function bookAll(id){const b=M.books.get(id);if(!b||!b.only||!isAdm())retu
 /* ----- how to use: a quick-start card and a short tour, then one tip per tab the first time. Nothing blocks the app; all of it can be skipped. ----- */
 const TIPS={bank:'Every question you got wrong is kept here. It comes back after 1, 3 and 7 days, until you answer it right four times.',
   stats:'Your answers by day, by book and by topic. Open Topics to find what to revise first.',
-  library:'These are the books of your specialty. Open a book to see its chapters and questions.',
+  library:'These are the books of your specialty. Their questions are in Study.',
   focus:'Deep Focus keeps your saved questions and your notebook, for revising one topic deeply.',
   import:'Is a book missing? Upload its file here and an admin adds it for you.',
   prices:'Your plan, its end date and the prices are here. Request a plan, then pay an admin.',
@@ -5124,6 +5124,7 @@ function pager(pg,pages,key){if(pages<=1)return'';return`<div class="pager"><but
 function viewLibrary(){
   if(pickOn()&&!libBooks().length&&availBooks().length)return`<h1>Library</h1><div class="notice info">Choose the books you want to study. Only their questions are downloaded to your device.</div>${availHTML()}`;
   if(!libBooks().length)return`<h1>Library</h1><div class="panel flat empty"><h3>No books yet</h3><p>${isAdm()?'Import an MCQ book and its questions, answers and explanations appear here, grouped by chapter.':'The books of your specialty appear here as soon as the admins add them. You can ask for a book from the Import tab.'}${isAdm()&&depBooks().length?` ${depBooks().length} book${depBooks().length>1?'s are':' is'} waiting in the Depository until ${depBooks().length>1?'they read':'it reads'} 100%.`:''}</p><button class="btn pri" data-a="nav" data-v="import">Import a book</button></div>`;
+  if(!libFull())return libPlain();
   if(S.libBook&&M.books.has(S.libBook))return libBook(M.books.get(S.libBook));
   return`<div class="spread"><h1>Library</h1><button class="btn" data-a="nav" data-v="import">${isAdm()?'Import a book':'Request a book'}</button></div>
   ${isAdm()&&!stuView()&&depBooks().length?`<div class="notice info undo-bar"><span>${depBooks().length} book${depBooks().length>1?'s are':' is'} in the Depository, not in your questions yet.</span><button class="btn sm" data-a="nav" data-v="depository">Open the Depository</button></div>`:''}
@@ -5132,6 +5133,10 @@ function viewLibrary(){
   ${libBooks().sort((a,b)=>a.name.localeCompare(b.name)).map(b=>{const ids=M.bookQ.get(b.id)||[];let n=0,c=0,seen=0;for(const id of ids){const s=M.qs.get(id);if(s){seen++;n+=s.n;c+=s.c}}
     return`<tr class="click" data-a="openBook" data-id="${b.id}"><td class="bkname"><div class="bkcell">${bookThumb(b)}<div><b>${esc(b.name)}</b> ${bookVerified(b)?VBADGE:''}${(b.chunks||[]).some(c=>!M.chunks.has(c.id))?' <span class="pill warn">downloading</span>':''}</div></div></td><td>${b.source?.kind?`<span class="pill ${(KIND[b.source.kind.k]||KIND.mixed).cls}">${(KIND[b.source.kind.k]||KIND.mixed).l}</span>`:'<span class="small muted">not recorded</span>'}</td><td class="n">${nf(ids.length)}</td><td class="n">${(b.topics||[]).length}</td><td class="n">${nf(seen)}</td><td class="n">${fmtPct(c,n)}</td><td>${fmtDay(b.createdAt)}</td></tr>`}).join('')}</tbody></table></div>${availHTML()}`;
 }
+/* book details are for admins (18 Nov 2026): users see the list of books only, nothing to open */
+function libFull(){return isAdm()&&!stuView()}
+function libPlain(){return`<div class="spread"><h1>Library</h1><button class="btn" data-a="nav" data-v="import">Request a book</button></div>
+  <div class="stack libplain">${libBooks().sort((a,b)=>a.name.localeCompare(b.name)).map(b=>`<div class="panel flat bkcell">${bookThumb(b)}<b style="overflow-wrap:anywhere">${esc(b.name)}</b>${(b.chunks||[]).some(c=>!M.chunks.has(c.id))?' <span class="pill warn">downloading</span>':''}</div>`).join('')}</div>${availHTML()}`}
 function libBook(b){
   const ids=M.bookQ.get(b.id)||[],qq=S.libQuery.trim().toLowerCase(),f=S.libFilter,tf=S.libTopic??'';
   let list=ids.filter(id=>{const q=M.Q.get(id),s=M.qs.get(id);if(tf!==''&&q.t!==+tf)return false;
@@ -7623,7 +7628,7 @@ document.addEventListener('click',async e=>{
     case'sessBack':S.sessDetail=null;render();break;
     case'bkGet':bkGet(d.id);break;
     case'bkDrop':bkDrop(d.id);break;
-    case'openBook':if(M.books.get(d.id)?.dep){S.depBook=d.id;go('depository');break}S.libBook=d.id;S.libPage=0;S.libQuery='';S.libTopic='';S.libFilter='all';go('library');break;
+    case'openBook':if(!libFull())break;if(M.books.get(d.id)?.dep){S.depBook=d.id;go('depository');break}S.libBook=d.id;S.libPage=0;S.libQuery='';S.libTopic='';S.libFilter='all';go('library');break;
     case'depOpen':S.depBook=d.id;S.depPage=0;render();scrollTo(0,0);break;
     case'depClose':S.depBook=null;render();break;
     case'depAdd':await depAdd(d.id,d.k==='force');break;
