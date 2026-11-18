@@ -2758,7 +2758,8 @@ const pickKey=()=>'mv-pick-'+(ACC?ACC.u:'');
 function pickLocal(){try{const v=JSON.parse(localStorage.getItem(pickKey())||'null');return Array.isArray(v)?v:null}catch(e){return null}}
 function pickDerived(){const k=(M.att||[]).length+'|'+M.chunks.size+'|'+M.books.size;if(pickDerived.k===k)return pickDerived.v;const s=new Set();for(const c of M.chunks.values())if(c.bookId)s.add(c.bookId);for(const r of M.att||[]){const q=String(r.q||''),i=q.lastIndexOf('.');if(i>0)s.add(q.slice(0,i))}pickDerived.k=k;return pickDerived.v=[...s].filter(id=>M.books.has(id))}
 function pickList(){if(ME&&Array.isArray(ME.pick))return ME.pick;const l=pickLocal();if(l)return l;return pickDerived()}
-function pickOn(){return !!ACC&&!isAdm()}
+const BOD_ON=false; /* books on demand: built 18 Nov 2026, switched off the same day (Mohammed: not what he meant) */
+function pickOn(){return BOD_ON&&!!ACC&&!isAdm()}
 function wantBook(id){return !pickOn()||pickList().includes(id)}
 async function pickSave(list){list=[...new Set(list)];try{localStorage.setItem(pickKey(),JSON.stringify(list))}catch(e){}if(ME)ME.pick=list;
   try{const st=await gas('acc_pick',{b:list});if(st)meSet(st)}catch(e){console.warn('pick',e)}}
@@ -3755,7 +3756,7 @@ function onbPaint(){let ov=$('#onbov');if(!ov){ov=document.createElement('div');
   </div></div>`}
 async function onbSave(){ONB.busy=true;ONB.err='';onbPaint();
   try{const st=await gas('acc_profile',{sp:ONB.sp});ONB.busy=false;const ov=$('#onbov');if(ov)ov.remove();const first=!ONB.edit;meSet(st);if(ONB.after){const k=ONB.after;ONB.after=null;return viewSet(k)}if(S.on)await pull(true);
-    toast(first?'Welcome. Choose the books you want to study and press Download.':'Saved. Your books are updating.',6000);if(first)go(pickOn()?'library':'study');else render()}
+    toast(first?(pickOn()?'Welcome. Choose the books you want to study and press Download.':'Welcome. Your question books are downloading.'):(pickOn()?'Saved. Your books are updating.':'Saved. Your question books are updating.'),6000);if(first)go(pickOn()?'library':'study');else render()}
   catch(e){ONB.busy=false;ONB.err=navigator.onLine===false||isNetErr(e)?'No internet connection right now. Connect and try again.':cleanErr(e);onbPaint()}}
 function profilePanel(){if(!ACC||!ME)return'';
   const act=isAdm()?'':ME.trial&&ME.trial.on?(ME.act?`<p class="small">Activated on this device on ${fmtDay(ME.act)}.</p>`:`<p class="small">Free trial: ${nf(Math.min(trialUsed(),ME.trial.n))} of ${nf(ME.trial.n)} questions used. After that you need an activation code from an admin.</p>`):'';
