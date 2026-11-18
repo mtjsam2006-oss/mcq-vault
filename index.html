@@ -2110,6 +2110,20 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Your saved questions and your notebook.":"أسئلتك المحفوظة ودفتر ملاحظاتك.",
+"Opening Deep Focus…":"جارٍ فتح التركيز العميق…",
+"Deep Focus keeps your saved questions and your notebook, for revising one topic deeply.":"يحفظ التركيز العميق أسئلتك المحفوظة ودفتر ملاحظاتك، لمراجعة موضوع واحد بعمق.",
+"Books you can download":"كتب يمكنك تنزيلها",
+"Only the books you download take space on your device. Press Download to add a book's questions.":"الكتب التي تنزّلها فقط تأخذ مساحة على جهازك. اضغط تنزيل لإضافة أسئلة الكتاب.",
+"Download":"تنزيل",
+"Choose the books you want to study. Only their questions are downloaded to your device.":"اختر الكتب التي تريد دراستها. تُنزَّل أسئلتها فقط إلى جهازك.",
+"Remove from this device":"إزالة من هذا الجهاز",
+"No books downloaded yet.":"لم تُنزَّل أي كتب بعد.",
+"Choose books in the Library":"اختر الكتب من المكتبة",
+"Welcome. Choose the books you want to study and press Download.":"أهلًا بك. اختر الكتب التي تريد دراستها واضغط تنزيل.",
+"Saved. Your books are updating.":"تم الحفظ. يجري تحديث كتبك.",
+"Downloading the questions of {}":"جارٍ تنزيل أسئلة {1}",
+"{} was removed from this device. Your answers are kept; download it again any time.":"أُزيل {1} من هذا الجهاز. إجاباتك محفوظة، ويمكنك تنزيله مرة أخرى في أي وقت.",
 "Summary":"ملخص",
 "Mnemonics":"وسائل حفظ",
 "Diagram":"مخطط",
@@ -2680,7 +2694,8 @@ const FLD_=new Map();
 function rebuildQ(){
   M.Q.clear();M.bookQ.clear();M.depQ=new Map();M.offQ=new Map();
   const byBook=new Map();
-  for(const c of M.chunks.values()){const bk=M.books.get(c.bookId);if(!bk)continue;
+  const WB=pickOn()?new Set(pickList()):null;
+  for(const c of M.chunks.values()){const bk=M.books.get(c.bookId);if(!bk||WB&&!WB.has(c.bookId))continue;
     if(bk.strict&&!(bk.chunks||[]).some(x=>x.id===c.id))continue; // a book re-read by the checker: only its current blocks
     (byBook.get(c.bookId)||byBook.set(c.bookId,[]).get(c.bookId)).push(c)}
   for(const [b,cs] of byBook){cs.sort((x,y)=>x.n-y.n);
@@ -2738,7 +2753,27 @@ function keepGroups(ids,pool,count){const G=qGroups();if(!G.members.size)return 
   fill(ids);if(pool&&out.length<Math.min(lim,ids.length))fill(coverOrder(pool.filter(id=>!seen.has(id))));
   return out}
 // the books whose questions are in the pool (everything except the Depository)
-function libBooks(){return [...M.books.values()].filter(b=>!b.dep&&!bookOff(b.id))}
+/* ----- books on demand: a user's questions download only for the books they chose (admins get every book) ----- */
+const pickKey=()=>'mv-pick-'+(ACC?ACC.u:'');
+function pickLocal(){try{const v=JSON.parse(localStorage.getItem(pickKey())||'null');return Array.isArray(v)?v:null}catch(e){return null}}
+function pickDerived(){const k=(M.att||[]).length+'|'+M.chunks.size+'|'+M.books.size;if(pickDerived.k===k)return pickDerived.v;const s=new Set();for(const c of M.chunks.values())if(c.bookId)s.add(c.bookId);for(const r of M.att||[]){const q=String(r.q||''),i=q.lastIndexOf('.');if(i>0)s.add(q.slice(0,i))}pickDerived.k=k;return pickDerived.v=[...s].filter(id=>M.books.has(id))}
+function pickList(){if(ME&&Array.isArray(ME.pick))return ME.pick;const l=pickLocal();if(l)return l;return pickDerived()}
+function pickOn(){return !!ACC&&!isAdm()}
+function wantBook(id){return !pickOn()||pickList().includes(id)}
+async function pickSave(list){list=[...new Set(list)];try{localStorage.setItem(pickKey(),JSON.stringify(list))}catch(e){}if(ME)ME.pick=list;
+  try{const st=await gas('acc_pick',{b:list});if(st)meSet(st)}catch(e){console.warn('pick',e)}}
+function pickSeed(){if(!pickOn()||!ME||Array.isArray(ME.pick)||pickSeed.done)return;pickSeed.done=1;pickSave(pickDerived())} // an account from before books on demand keeps what it studies
+function availBooks(){return pickOn()?[...M.books.values()].filter(b=>!b.dep&&!bookOff(b.id)&&!wantBook(b.id)).sort((a,b)=>a.name.localeCompare(b.name)):[]}
+async function bkGet(id){const b=M.books.get(id);if(!b)return;await pickSave(pickList().concat(id));toast(`Downloading the questions of ${b.name}`,4000);render();await ensureChunks();rebuildQ();render()}
+async function bkDrop(id){const b=M.books.get(id);if(!b)return;await pickSave(pickList().filter(x=>x!==id));
+  for(const [cid,c] of [...M.chunks])if(c.bookId===id){M.chunks.delete(cid);await IDB.del('chunks',cid).catch(()=>{})}
+  S.libBook=null;rebuildQ();render();toast(`${b.name} was removed from this device. Your answers are kept; download it again any time.`,5000)}
+function availHTML(){const L=availBooks();if(!L.length)return'';
+  return`<div class="panel"><h3>Books you can download</h3><p class="small muted">Only the books you download take space on your device. Press Download to add a book's questions.</p>
+  <div class="tbl-wrap"><table><thead><tr><th>Book</th><th class="n">Questions</th><th class="n">Chapters</th><th></th></tr></thead><tbody>
+  ${L.map(b=>`<tr><td class="bkname"><div class="bkcell">${bookThumb(b)}<div><b>${esc(b.name)}</b> ${bookVerified(b)?VBADGE:''}</div></div></td><td class="n">${nf(b.count||0)}</td><td class="n">${(b.topics||[]).length}</td><td><button class="btn sm pri" data-a="bkGet" data-id="${b.id}">Download</button></td></tr>`).join('')}
+  </tbody></table></div></div>`}
+function libBooks(){return [...M.books.values()].filter(b=>!b.dep&&!bookOff(b.id)&&wantBook(b.id))}
 function depBooks(){return [...M.books.values()].filter(b=>b.dep).sort((a,b)=>a.name.localeCompare(b.name))}
 function unpackAtt(id,a,dev){return{id,q:a[0],ch:a[1],ok:!!a[2],ms:a[3]||0,ts:a[4],sid:a[5],to:!!a[6],dev,...(a[7]?{ex:1}:{})}}
 const RESET_KEY='~reset',UNDO_MS=10*60000;
@@ -3149,6 +3184,7 @@ async function pull(full){
     await kvPut('lastPull',serverNow);S.lastPull=now();S.syncErr=null;
     if(anyLog||S.pending.size){rebuildAtt();await savePending();if(S.pending.size)scheduleFlush(500)}
     if(anyBook)rebuildQ();
+    try{pickSeed()}catch(e){}
     await ensureChunks();
     if(anyLog||anyBook)softRender();
     return anyLog||anyBook;
@@ -3158,7 +3194,7 @@ async function pull(full){
 async function dropBookLocal(id){M.books.delete(id);for(const [cid,c] of [...M.chunks])if(c.bookId===id){M.chunks.delete(cid);await IDB.del('chunks',cid)}await kvPut('books',[...M.books.values()]);rebuildQ()}
 async function ensureChunks(){
   if(!S.on||S.ensuring)return;const need=[],mine=new Set((S.outbox||[]).filter(o=>o.k==='chunk').map(o=>o.id));
-  for(const b of M.books.values())for(const c of b.chunks||[]){const l=M.chunks.get(c.id);if((!l||l.v!==c.v)&&!(l&&mine.has(c.id)))need.push(c.id)}
+  for(const b of M.books.values()){if(!wantBook(b.id))continue;for(const c of b.chunks||[]){const l=M.chunks.get(c.id);if((!l||l.v!==c.v)&&!(l&&mine.has(c.id)))need.push(c.id)}}
   if(!need.length)return;S.ensuring=true;
   let done=0;const total=need.length;S.dl=`Downloading questions 0/${total}`;setSync();
   const per=Cloud.mode==='gas'?12:1;
@@ -3495,7 +3531,7 @@ async function bookAll(id){const b=M.books.get(id);if(!b||!b.only||!isAdm())retu
 const TIPS={bank:'Every question you got wrong is kept here. It comes back after 1, 3 and 7 days, until you answer it right four times.',
   stats:'Your answers by day, by book and by topic. Open Topics to find what to revise first.',
   library:'These are the books of your specialty. Open a book to see its chapters and questions.',
-  focus:'Deep Focus keeps your saved questions, your textbooks and your notebook, for revising one topic deeply.',
+  focus:'Deep Focus keeps your saved questions and your notebook, for revising one topic deeply.',
   import:'Is a book missing? Upload its file here and an admin adds it for you.',
   prices:'Your plan, its end date and the prices are here. Request a plan, then pay an admin.',
   settings:'Language, daily target, reminders, your password and your specialty are here.',
@@ -3721,7 +3757,7 @@ function onbPaint(){let ov=$('#onbov');if(!ov){ov=document.createElement('div');
   </div></div>`}
 async function onbSave(){ONB.busy=true;ONB.err='';onbPaint();
   try{const st=await gas('acc_profile',{sp:ONB.sp});ONB.busy=false;const ov=$('#onbov');if(ov)ov.remove();const first=!ONB.edit;meSet(st);if(ONB.after){const k=ONB.after;ONB.after=null;return viewSet(k)}if(S.on)await pull(true);
-    toast(first?'Welcome. Your question books are downloading.':'Saved. Your question books are updating.',6000);if(first)go('study');else render()}
+    toast(first?'Welcome. Choose the books you want to study and press Download.':'Saved. Your books are updating.',6000);if(first)go(pickOn()?'library':'study');else render()}
   catch(e){ONB.busy=false;ONB.err=navigator.onLine===false||isNetErr(e)?'No internet connection right now. Connect and try again.':cleanErr(e);onbPaint()}}
 function profilePanel(){if(!ACC||!ME)return'';
   const act=isAdm()?'':ME.trial&&ME.trial.on?(ME.act?`<p class="small">Activated on this device on ${fmtDay(ME.act)}.</p>`:`<p class="small">Free trial: ${nf(Math.min(trialUsed(),ME.trial.n))} of ${nf(ME.trial.n)} questions used. After that you need an activation code from an admin.</p>`):'';
@@ -4477,7 +4513,7 @@ new MutationObserver(ms=>{for(const m of ms){for(const n of m.addedNodes)if(n.cl
 function bookVerified(b){const c=bookCoverage(b);return !!c&&/[SA]/.test(c.map)&&!/[PXUFE\-]/.test(c.map)}
 const VBADGE=`<span class="vbadge" title="Every question in this book was imported and checked"><svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l2.4 1.8 3-.2.9 2.9 2.5 1.7-1 2.8 1 2.8-2.5 1.7-.9 2.9-3-.2L12 22l-2.4-1.8-3 .2-.9-2.9-2.5-1.7 1-2.8-1-2.8 2.5-1.7.9-2.9 3 .2z"/><path d="M8 12.2l2.7 2.7L16.2 9.4" fill="none" stroke="var(--surface)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>100%</span>`;
 function bookTree(prefix){
-  if(!libBooks().length)return`<div class="notice info">Your library is empty. Import a book first.</div>`;
+  if(!libBooks().length)return pickOn()?`<div class="notice info">No books downloaded yet. <button class="btn sm pri" data-a="nav" data-v="library">Choose books in the Library</button></div>`:`<div class="notice info">Your library is empty. Import a book first.</div>`;
   return`<div class="tree">${libBooks().sort((a,b)=>a.name.localeCompare(b.name)).map(b=>`
     <details><summary><label class="chk" style="display:inline-flex"><input type="checkbox" name="${prefix}bk" value="${b.id}" data-a="bkall"> ${esc(b.name)} ${bookVerified(b)?VBADGE:''} <span class="pill">${nf((M.bookQ.get(b.id)||[]).length)}</span></label></summary>
     <div class="topics">${(b.topics||[]).map((t,i)=>`<label class="chk"><input type="checkbox" name="${prefix}tp" value="${b.id}|${i}" data-bk="${b.id}"> ${esc(t)} <span class="muted small">${nf(topicCount(b.id,i))}</span></label>`).join('')}</div></details>`).join('')}</div>`;
@@ -5065,6 +5101,7 @@ function pager(pg,pages,key){if(pages<=1)return'';return`<div class="pager"><but
 
 /* ================= library ================= */
 function viewLibrary(){
+  if(pickOn()&&!libBooks().length&&availBooks().length)return`<h1>Library</h1><div class="notice info">Choose the books you want to study. Only their questions are downloaded to your device.</div>${availHTML()}`;
   if(!libBooks().length)return`<h1>Library</h1><div class="panel flat empty"><h3>No books yet</h3><p>${isAdm()?'Import an MCQ book and its questions, answers and explanations appear here, grouped by chapter.':'The books of your specialty appear here as soon as the admins add them. You can ask for a book from the Import tab.'}${isAdm()&&depBooks().length?` ${depBooks().length} book${depBooks().length>1?'s are':' is'} waiting in the Depository until ${depBooks().length>1?'they read':'it reads'} 100%.`:''}</p><button class="btn pri" data-a="nav" data-v="import">Import a book</button></div>`;
   if(S.libBook&&M.books.has(S.libBook))return libBook(M.books.get(S.libBook));
   return`<div class="spread"><h1>Library</h1><button class="btn" data-a="nav" data-v="import">${isAdm()?'Import a book':'Request a book'}</button></div>
@@ -5072,7 +5109,7 @@ function viewLibrary(){
   ${(()=>{const L=isAdm()&&!stuView()?[...M.books.values()].filter(b=>!b.cover):[];return L.length?`<div class="notice info undo-bar"><span>${L.length} book${L.length>1?'s have':' has'} no picture yet (imported before pictures came in). Choose ${L.length>1?'their PDFs, all at once if you like':'its PDF'}: each book gets page 1 of its own PDF.</span><label class="btn sm">Choose PDFs<input type="file" id="coverbulk" accept="application/pdf,.pdf" multiple hidden></label></div>`:''})()}
   <div class="tbl-wrap"><table><thead><tr><th>Book</th><th>File type</th><th class="n">Questions</th><th class="n">Chapters</th><th class="n">Seen</th><th class="n">Accuracy</th><th>Imported</th></tr></thead><tbody>
   ${libBooks().sort((a,b)=>a.name.localeCompare(b.name)).map(b=>{const ids=M.bookQ.get(b.id)||[];let n=0,c=0,seen=0;for(const id of ids){const s=M.qs.get(id);if(s){seen++;n+=s.n;c+=s.c}}
-    return`<tr class="click" data-a="openBook" data-id="${b.id}"><td class="bkname"><div class="bkcell">${bookThumb(b)}<div><b>${esc(b.name)}</b> ${bookVerified(b)?VBADGE:''}${(b.chunks||[]).some(c=>!M.chunks.has(c.id))?' <span class="pill warn">downloading</span>':''}</div></div></td><td>${b.source?.kind?`<span class="pill ${(KIND[b.source.kind.k]||KIND.mixed).cls}">${(KIND[b.source.kind.k]||KIND.mixed).l}</span>`:'<span class="small muted">not recorded</span>'}</td><td class="n">${nf(ids.length)}</td><td class="n">${(b.topics||[]).length}</td><td class="n">${nf(seen)}</td><td class="n">${fmtPct(c,n)}</td><td>${fmtDay(b.createdAt)}</td></tr>`}).join('')}</tbody></table></div>`;
+    return`<tr class="click" data-a="openBook" data-id="${b.id}"><td class="bkname"><div class="bkcell">${bookThumb(b)}<div><b>${esc(b.name)}</b> ${bookVerified(b)?VBADGE:''}${(b.chunks||[]).some(c=>!M.chunks.has(c.id))?' <span class="pill warn">downloading</span>':''}</div></div></td><td>${b.source?.kind?`<span class="pill ${(KIND[b.source.kind.k]||KIND.mixed).cls}">${(KIND[b.source.kind.k]||KIND.mixed).l}</span>`:'<span class="small muted">not recorded</span>'}</td><td class="n">${nf(ids.length)}</td><td class="n">${(b.topics||[]).length}</td><td class="n">${nf(seen)}</td><td class="n">${fmtPct(c,n)}</td><td>${fmtDay(b.createdAt)}</td></tr>`}).join('')}</tbody></table></div>${availHTML()}`;
 }
 function libBook(b){
   const ids=M.bookQ.get(b.id)||[],qq=S.libQuery.trim().toLowerCase(),f=S.libFilter,tf=S.libTopic??'';
@@ -5083,6 +5120,7 @@ function libBook(b){
   return`<div class="row"><button class="btn sm" data-a="closeBook">← All books</button></div>
   <div class="spread"><div class="bkhead"><label class="cvbox" title="Choose the book PDF (its first page is used) or any picture">${bookThumb(b,true)}<span class="btn sm ghost">${b.cover?'Change picture':'Add picture'}</span><input type="file" id="coverfile" data-id="${b.id}" accept="application/pdf,.pdf,image/${'*'}" hidden></label><div class="stack" style="gap:4px"><h1 style="overflow-wrap:anywhere">${esc(b.name)} ${bookVerified(b)?VBADGE:''}</h1><p class="muted">${nf(ids.length)} questions · ${(b.topics||[]).length} chapters · imported ${fmtDay(b.createdAt)}${b.source?.file?' from '+esc(b.source.file):''}</p></div></div>
   <div class="row"><button class="btn sm" data-a="impInto" data-id="${b.id}">Import more into this book</button><button class="btn sm" data-a="editTopics" data-id="${b.id}">Rename book or chapters</button><button class="btn sm" data-a="depBack" data-id="${b.id}">Send to Depository</button><button class="btn sm danger" data-a="delBook" data-id="${b.id}">Delete book</button></div></div>
+  ${pickOn()?`<div class="row"><button class="btn sm" data-a="bkDrop" data-id="${b.id}">Remove from this device</button></div>`:''}
   ${b.source?.kind?kindBar(b.source.kind):''}
   ${bookCoveragePanel(b)}
   <div class="row">
@@ -6894,6 +6932,7 @@ async function rebuildCache(){
    use the optional ANTHROPIC_API_KEY (billed by Anthropic per use, not part of a Claude subscription). */
 const Focus=(()=>{
   const F={wanted:false,tbs:new Map(),pages:new Map(),idx:null,idxKey:'',building:null,notes:{items:{}},sk:new Map(),pdf:new Map(),files:new Set(),dl:'',syncing:false,booted:false};
+  const FX_TEXT=false; // textbooks (upload, search, pages) are switched off since 18 Nov 2026; true brings them back
   const FX=()=>S.fx||(S.fx={tab:'saved',q:'',tb:'',qid:null,topic:null,terms:null,res:null,more:false,set:[],read:null,out:null,nbType:'all',nbQ:'',add:null});
   const cloudOK=()=>S.on&&Cloud.mode==='gas';
   const FC={put:(k,id,o)=>gas('api_put',k,id,o),get:(k,ids)=>gas('api_get',k,ids),del:(k,id)=>gas('api_del',k,id),list:()=>gas('api_focus')};
@@ -7103,7 +7142,7 @@ const Focus=(()=>{
   async function sync(){
     if(!cloudOK()||F.syncing)return;F.syncing=true;
     try{const r=await FC.list();let ch=false;
-      for(const {id,data:b} of r.tbooks||[]){if(!b)continue;const l=F.tbs.get(id);
+      if(FX_TEXT)for(const {id,data:b} of r.tbooks||[]){if(!b)continue;const l=F.tbs.get(id);
         if(b.deleted){if(l&&!l.deleted){for(const c of l.chunks||[])await DB.del('pages',c.id);F.pages.delete(id);F.tbs.set(id,b);ch=true}else if(!l)F.tbs.set(id,b);continue}
         if(!l||(!l.deleted&&(b.updatedAt||0)>(l.updatedAt||0))){F.tbs.set(id,{...b,id});ch=true}else if(l.deleted)FC.put('tbooks',id,l).catch(()=>{})}
       await skFlush();
@@ -7111,8 +7150,8 @@ const Focus=(()=>{
         for(const [k,v] of Object.entries(F.notes.items)){const rv=r.notes.items[k];if(!rv||(v.upd||0)>(rv.upd||0))up=true}if(up)pushNotes();await saveNotesLocal()}
       else if(Object.keys(F.notes.items).length)pushNotes();
       if(ch)await saveMetas();
-      for(const tb of F.tbs.values())if(tb.local)upload(tb.id);
-      if(F.wanted)await fetchPages();
+      if(FX_TEXT){for(const tb of F.tbs.values())if(tb.local)upload(tb.id);
+      if(F.wanted)await fetchPages()}
       if(ch)softFocus();
     }catch(e){console.warn('focus sync',e)}finally{F.syncing=false}}
   async function fetchPages(){
@@ -7155,7 +7194,7 @@ const Focus=(()=>{
     if(!all.length)return`<div class="panel flat empty"><h3>No saved questions yet</h3><p>Tap ☆ Save for revision on any question (during a session, in the Library or here) and it waits here until you have revised it.</p></div>`;
     return`<div class="panel"><div class="spread"><div class="stack" style="gap:4px"><h3>Saved for revision</h3><p class="small muted">${nf(all.length)} question${all.length===1?'':'s'}, newest first. Each shows its answer and the book's explanation; remove it once you have revised it.</p></div>
       <button class="btn pri" data-f="studySaved">Study these ${nf(all.length)}</button></div></div>
-      <div class="stack">${all.map(x=>{const q=M.Q.get(x.qid);return qCard(q,{extra:`<div class="spread"><span class="small muted">Saved ${new Date(x.at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}</span><span class="row" style="gap:6px">${saveBtn(q)}<button class="btn sm pri" data-f="studyQ" data-id="${q.id}" title="Open every textbook page related to this question">${ICON_BOOK} Textbook pages</button></span></div>`})}).join('')}</div>`}
+      <div class="stack">${all.map(x=>{const q=M.Q.get(x.qid);return qCard(q,{extra:`<div class="spread"><span class="small muted">Saved ${new Date(x.at).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'})}</span><span class="row" style="gap:6px">${saveBtn(q)}${FX_TEXT?`<button class="btn sm pri" data-f="studyQ" data-id="${q.id}" title="Open every textbook page related to this question">${ICON_BOOK} Textbook pages</button>`:''}</span></div>`})}).join('')}</div>`}
 
   /* ---------- study set: the passages the tools work on ---------- */
   function studySet(){const X=FX(),I=F.idx;if(!I)return[];
@@ -7247,13 +7286,14 @@ const Focus=(()=>{
 
   /* ---------- views ---------- */
   function view(){
-    const X=FX();if(!F.booted){boot();return`<h1>Deep Focus</h1><div class="empty"><h3>Opening your textbooks\u2026</h3></div>`}
+    const X=FX();if(!F.booted){boot();return`<h1>Deep Focus</h1><div class="empty"><h3>Opening Deep Focus\u2026</h3></div>`}
     const nSaved=saved().length;
     const grp=X.tab==='saved'||X.tab==='notes'?X.tab:'text';
-    const tabs=[['saved',`Saved questions${nSaved?` \u00b7 ${nSaved}`:''}`],['text',`Textbooks${live().length?` \u00b7 ${live().length}`:''}`],['notes',`Notebook${items().length?` \u00b7 ${items().length}`:''}`]];
+    if(!FX_TEXT&&X.tab!=='saved'&&X.tab!=='notes')X.tab='saved';
+    const tabs=[['saved',`Saved questions${nSaved?` \u00b7 ${nSaved}`:''}`],['text',`Textbooks${live().length?` \u00b7 ${live().length}`:''}`],['notes',`Notebook${items().length?` \u00b7 ${items().length}`:''}`]].filter(t=>FX_TEXT||t[0]!=='text');
     const subs=[['search','Search & study'],['topics','By topic'],['books','Manage textbooks']];
     const sub=grp==='text'?`<div class="seg fxsub" role="tablist">${subs.map(([k,l])=>`<label><input type="radio" name="fxsub" value="${k}" data-f="tab" ${X.tab===k?'checked':''}><span>${l}</span></label>`).join('')}</div>`:'';
-    const head=`<div class="spread"><div class="stack" style="gap:4px"><h1>Deep Focus</h1><p class="muted">Read your textbooks around the questions you study.</p></div>${X.fromQuiz&&S.active?`<button class="btn sm" data-f="backQuiz">\u2190 Back to the question</button>`:''}</div>
+    const head=`<div class="spread"><div class="stack" style="gap:4px"><h1>Deep Focus</h1><p class="muted">${FX_TEXT?'Read your textbooks around the questions you study.':'Your saved questions and your notebook.'}</p></div>${X.fromQuiz&&S.active?`<button class="btn sm" data-f="backQuiz">\u2190 Back to the question</button>`:''}</div>
       <div class="seg fxtabs" role="tablist">${tabs.map(([k,l])=>`<label><input type="radio" name="fxtab" value="${k}" data-f="tab" ${grp===k?'checked':''}><span>${l}</span></label>`).join('')}</div>${sub}${F.dl?`<div class="notice info small">${esc(F.dl)}</div>`:''}`;
     if(X.tab==='saved')return head+viewSaved();
     if(X.tab==='books')return head+viewBooks();
@@ -7263,7 +7303,7 @@ const Focus=(()=>{
     if(X.tab==='notes')return head+viewNotes();
     return head+(X.read?viewReader():viewSearch());
   }
-  function setTab(v){const X=FX();if(v==='text')v=X.lastText||'search';if(['search','topics','books'].includes(v))X.lastText=v;X.tab=v}
+  function setTab(v){const X=FX();if(!FX_TEXT&&v!=='saved'&&v!=='notes')v='saved';if(v==='text')v=X.lastText||'search';if(['search','topics','books'].includes(v))X.lastText=v;X.tab=v}
   function toolbar(){const X=FX(),ai=Cloud.ai;const b=(k,l,dis)=>`<button class="btn sm" data-f="tool" data-k="${k}" ${dis?'disabled':''}>${l}</button>`;
     return`<div class="panel fxtools"><div class="spread"><h3>Study tools</h3><span class="small muted">Working on ${esc(setLabel())}</span></div>
       <div class="row">${b('keys','Key points')}${b('cards','Flashcards')}${b('map','Concept map')}${b('sketch','Sketch pad')}${b('note','Write a note')}</div>
@@ -7503,7 +7543,7 @@ const Focus=(()=>{
   });
   let nqT;document.addEventListener('input',e=>{if(e.target.id==='fxnq'){clearTimeout(nqT);nqT=setTimeout(()=>{FX().nbQ=e.target.value;render();const i=$('#fxnq');if(i){i.focus();i.setSelectionRange(i.value.length,i.value.length)}},300)}});
 
-  function btn(q){return q&&q.id?`<button class="btn sm ghost fxbtn" data-f="open" data-id="${q.id}" title="Open the textbook pages on this question">${ICON_BOOK} Deep Focus</button>`:''}
+  function btn(q){return FX_TEXT&&q&&q.id?`<button class="btn sm ghost fxbtn" data-f="open" data-id="${q.id}" title="Open the textbook pages on this question">${ICON_BOOK} Deep Focus</button>`:''}
   return{view,boot,sync,btn,saveBtn,isSaved,fromQ,F,_t:{toks,search,keyPoints,cards,conceptMap,tidy,bookRefs,weighted,qTerms}};
 })();
 const ICON_BOOK='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2z"/><path d="M22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>';
@@ -7547,6 +7587,8 @@ document.addEventListener('click',async e=>{
     case'page':S[d.k]=Math.max(0,+d.p);if(S.imp&&d.k==='revPage')S.imp.revPage=S.revPage;render();scrollTo(0,0);break;
     case'sess':S.sessDetail=d.id;render();scrollTo(0,0);break;
     case'sessBack':S.sessDetail=null;render();break;
+    case'bkGet':bkGet(d.id);break;
+    case'bkDrop':bkDrop(d.id);break;
     case'openBook':if(M.books.get(d.id)?.dep){S.depBook=d.id;go('depository');break}S.libBook=d.id;S.libPage=0;S.libQuery='';S.libTopic='';S.libFilter='all';go('library');break;
     case'depOpen':S.depBook=d.id;S.depPage=0;render();scrollTo(0,0);break;
     case'depClose':S.depBook=null;render();break;
