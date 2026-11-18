@@ -2529,7 +2529,7 @@ const fmtDur=ms=>{ms=Math.max(0,Math.round(ms/1000));const h=Math.floor(ms/3600)
 const fmtClock=ms=>{const t=Math.max(0,Math.ceil(ms/1000));const h=Math.floor(t/3600),m=Math.floor(t%3600/60),s=t%60;return (h?h+':'+pad(m):m)+':'+pad(s)};
 const pct=(a,b)=>b?Math.round(a*1000/b)/10:0;
 const fmtPct=(a,b)=>b?pct(a,b).toFixed(1)+'%':'—';
-const nf=n=>Number(n||0).toLocaleString();
+const NF_=new Intl.NumberFormat();const nf=n=>NF_.format(Number(n||0));
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const sameSet=(a,b)=>a.length===b.length&&a.every(x=>b.includes(x));
 const clone=o=>typeof structuredClone==='function'?structuredClone(o):JSON.parse(JSON.stringify(o));
@@ -2676,6 +2676,7 @@ const Subjects=(()=>{
   return{classify,field,names:PSY.names.concat(OBG.names,['Other'])};
 })();
 /*SUBJECTS-END*/
+const FLD_=new Map();
 function rebuildQ(){
   M.Q.clear();M.bookQ.clear();M.depQ=new Map();M.offQ=new Map();
   const byBook=new Map();
@@ -2686,7 +2687,7 @@ function rebuildQ(){
     const bk=M.books.get(b);
     if(bk.dep){M.depQ.set(b,cs.flatMap(c=>c.qs.map(q=>({...q,b}))));continue} // Depository: not part of the question pool
     if(typeof bookOff==='function'&&bookOff(b)){M.offQ.set(b,cs.flatMap(c=>c.qs.map(q=>q.id)));continue} // an admin left this book out of their own study
-    const fld=Subjects.field(cs.flatMap(c=>c.qs)); // each book gets the subjects of its own field (psychiatry, O&G, or its own chapters)
+    const fk=cs.map(c=>c.id+':'+(c.v||0)+':'+c.qs.length).join(',');let fld=FLD_.get(b);if(!fld||fld.k!==fk){fld={k:fk,f:Subjects.field(cs.flatMap(c=>c.qs))};FLD_.set(b,fld)}fld=fld.f; // each book gets the subjects of its own field (psychiatry, O&G, or its own chapters)
     const list=[];for(const c of cs)for(const q of c.qs){const o={...q,b};o.sub=Subjects.classify(o,bk?.topics?.[o.t],fld);M.Q.set(q.id,o);list.push(q.id)}
     M.bookQ.set(b,list)}
   for(const b of M.books.values())if(!b.dep&&!M.bookQ.has(b.id))M.bookQ.set(b.id,[]);
@@ -2778,7 +2779,8 @@ function apiSetupFromHash(){try{const m=/[#&]setup=([^&]+)/.exec(location.hash||
   const o=JSON.parse(decodeURIComponent(escape(atob(m[1].replace(/-/g,'+').replace(/_/g,'/')))));
   if(o&&o.u){localStorage.setItem(API_CFG_KEY,JSON.stringify(o.k?{u:o.u,k:o.k}:{u:o.u}));S.justSetUp=true}
   history.replaceState(null,'',location.pathname+location.search)}catch(e){console.warn('setup link',e)}}
-async function apiCall(fn,args){
+async function apiCall(fn,args){for(let i=0;;i++){try{return await apiCall1(fn,args)}catch(e){const busy=e&&e.code==='unavailable'&&/not readable \((429|500|502|503|504)\)|busy|simultaneous|too many|Lock timeout|Try again in a moment/i.test(e.message||'');if(!busy||i>=3)throw e;await sleep(1200*(i+1)*(i+1)+Math.random()*900)}}}
+async function apiCall1(fn,args){
   const c=apiCfg();if(!c||!c.u)throw{code:'unavailable',message:'offline app not set up'};
   if(navigator.onLine===false)throw{code:'offline',message:'offline'};
   const ctl=typeof AbortController==='function'?new AbortController():null,t=ctl?setTimeout(()=>ctl.abort(),90000):0;let res;
@@ -3135,7 +3137,7 @@ async function mergeBooks(list){
 }
 /* pull everything changed since the last pull; full=true re-reads all */
 async function pull(full){
-  if(!S.on||S.pulling)return false;S.pulling=true;
+  if(S.on&&S.pulling&&full)S.pullFull=true;if(!S.on||S.pulling)return false;S.pulling=true;if(!full&&!S.healed&&!M.books.size&&ME&&ME.sp&&!isAdm()){full=true;S.healed=1}S.pullFull=false;
   try{
     let since=full?0:Math.max(0,((await kvGet('lastPull'))||0)-10*60000);let anyLog=false,anyBook=false,serverNow=null,g=0;
     while(g++<500){
@@ -3151,7 +3153,7 @@ async function pull(full){
     if(anyLog||anyBook)softRender();
     return anyLog||anyBook;
   }catch(e){console.warn('pull',e);S.syncErr=e;setSync();return false}
-  finally{S.pulling=false}
+  finally{S.pulling=false;if(S.pullFull&&S.on){S.pullFull=false;setTimeout(()=>pull(true),0)}}
 }
 async function dropBookLocal(id){M.books.delete(id);for(const [cid,c] of [...M.chunks])if(c.bookId===id){M.chunks.delete(cid);await IDB.del('chunks',cid)}await kvPut('books',[...M.books.values()]);rebuildQ()}
 async function ensureChunks(){
@@ -3159,11 +3161,11 @@ async function ensureChunks(){
   for(const b of M.books.values())for(const c of b.chunks||[]){const l=M.chunks.get(c.id);if((!l||l.v!==c.v)&&!(l&&mine.has(c.id)))need.push(c.id)}
   if(!need.length)return;S.ensuring=true;
   let done=0;const total=need.length;S.dl=`Downloading questions 0/${total}`;setSync();
-  const per=Cloud.mode==='gas'?6:1;
+  const per=Cloud.mode==='gas'?12:1;
   const worker=async()=>{while(need.length){const ids=need.splice(0,per);
     for(let t=0;t<3;t++){try{const got=await C().getChunks(ids);for(const {id,data} of got)if(data){const c={...data,id};M.chunks.set(id,c);await IDB.put('chunks',id,c).catch(()=>{})}break}catch(e){await sleep(1500*(t+1)+Math.random()*800)}}
     done+=ids.length;S.dl=`Downloading questions ${Math.min(done,total)}/${total}`;setSync()}};
-  await Promise.all([worker(),worker(),worker(),worker()]);
+  await Promise.all(Cloud.mode==='gas'?[worker(),worker(),worker()]:[worker(),worker(),worker(),worker()]);
   S.dl=null;S.ensuring=false;rebuildQ();setSync();softRender();
 }
 async function verifyCloud(){
@@ -4390,12 +4392,13 @@ function render(){
   if(!isAdm()&&(S.view==='depository'||S.view==='admin'))S.view='study';gateCheck();bellPaint();try{streakPaint()}catch(e){}Promise.resolve().then(()=>{try{tipPaint()}catch(e){}});
   const y0=scrollY;renderTabs();const m=$('#main');
   const v=S.view;document.body.classList.toggle('inquiz',v==='quiz');quizClock();
-  m.innerHTML=(v==='quiz'?'':undoBanner())+(v==='quiz'?viewQuiz():v==='summary'?viewSummary():v==='bank'?viewBank():v==='stats'?viewStats():v==='library'?viewLibrary():v==='depository'?viewDepository():v==='focus'?Focus.view():v==='import'?viewImport():v==='admin'?Admin.view():v==='prices'?viewPrices():v==='settings'?viewSettings():(trialBanner()+subBanner()+viewStudy()));
+  const html=(v==='quiz'?'':undoBanner())+(v==='quiz'?viewQuiz():v==='summary'?viewSummary():v==='bank'?viewBank():v==='stats'?viewStats():v==='library'?viewLibrary():v==='depository'?viewDepository():v==='focus'?Focus.view():v==='import'?viewImport():v==='admin'?Admin.view():v==='prices'?viewPrices():v==='settings'?viewSettings():(trialBanner()+subBanner()+viewStudy()));
+  if(!(render.soft&&render.last===html&&render.lastV===v&&m.childElementCount))m.innerHTML=html;render.last=html;render.lastV=v;
   if(v==='study')applyStyle();
   if(v==='quiz')startTicker();else stopTicker();
   navCommit(y0);
 }
-function softRender(){if(S.dead){deadPaint();return}if(['study','bank','stats','library','depository','settings','admin'].includes(S.view)){const y=scrollY;render();scrollTo(0,y)}else renderTabs()}
+function softRender(){if(S.dead){deadPaint();return}if(['study','bank','stats','library','depository','settings','admin'].includes(S.view)){const y=scrollY;render.soft=1;try{render()}finally{render.soft=0}scrollTo(0,y)}else renderTabs()}
 function go(v){if(isExam(S.active)&&!S.active.pv&&v!=='quiz'){if(S.view==='quiz'){toast('The exam is running. Press End exam to finish it.');startTicker();return}v='quiz'}S.view=v;render();scrollTo(0,0)}
 
 /* ================= back navigation ================= */
