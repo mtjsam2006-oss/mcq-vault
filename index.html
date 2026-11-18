@@ -2770,9 +2770,7 @@ async function bkDrop(id){const b=M.books.get(id);if(!b)return;await pickSave(pi
   S.libBook=null;rebuildQ();render();toast(`${b.name} was removed from this device. Your answers are kept; download it again any time.`,5000)}
 function availHTML(){const L=availBooks();if(!L.length)return'';
   return`<div class="panel"><h3>Books you can download</h3><p class="small muted">Only the books you download take space on your device. Press Download to add a book's questions.</p>
-  <div class="tbl-wrap"><table><thead><tr><th>Book</th><th class="n">Questions</th><th class="n">Chapters</th><th></th></tr></thead><tbody>
-  ${L.map(b=>`<tr><td class="bkname"><div class="bkcell">${bookThumb(b)}<div><b>${esc(b.name)}</b> ${bookVerified(b)?VBADGE:''}</div></div></td><td class="n">${nf(b.count||0)}</td><td class="n">${(b.topics||[]).length}</td><td><button class="btn sm pri" data-a="bkGet" data-id="${b.id}">Download</button></td></tr>`).join('')}
-  </tbody></table></div></div>`}
+  <div class="stack" style="gap:8px">${L.map(b=>`<div class="spread" style="gap:10px;flex-wrap:nowrap;align-items:center;border-top:1px solid var(--line,rgba(127,127,127,.25));padding-top:8px"><div class="bkcell" style="min-width:0">${bookThumb(b)}<div style="min-width:0"><b style="overflow-wrap:anywhere">${esc(b.name)}</b> ${bookVerified(b)?VBADGE:''}<div class="small muted">${nf(b.count||0)} questions · ${(b.topics||[]).length} chapters</div></div></div><button class="btn sm pri" style="flex:none" data-a="bkGet" data-id="${b.id}">Download</button></div>`).join('')}</div></div>`}
 function libBooks(){return [...M.books.values()].filter(b=>!b.dep&&!bookOff(b.id)&&wantBook(b.id))}
 function depBooks(){return [...M.books.values()].filter(b=>b.dep).sort((a,b)=>a.name.localeCompare(b.name))}
 function unpackAtt(id,a,dev){return{id,q:a[0],ch:a[1],ok:!!a[2],ms:a[3]||0,ts:a[4],sid:a[5],to:!!a[6],dev,...(a[7]?{ex:1}:{})}}
