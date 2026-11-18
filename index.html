@@ -2110,6 +2110,19 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"The marked answer is wrong":"الإجابة المحددة خاطئة",
+"More than one option is right":"أكثر من خيار صحيح",
+"None of the options is right":"لا يوجد خيار صحيح",
+"The explanation is missing":"الشرح غير موجود",
+"The explanation is wrong or does not match the answer":"الشرح خاطئ أو لا يطابق الإجابة",
+"The explanation is cut off, or belongs to another question":"الشرح مقطوع، أو يخص سؤالًا آخر",
+"The question is cut off, has missing words or typos":"السؤال مقطوع، أو فيه كلمات ناقصة أو أخطاء كتابية",
+"An option is missing, repeated or cut off":"أحد الخيارات ناقص أو مكرر أو مقطوع",
+"The case, table or picture is missing":"الحالة أو الجدول أو الصورة غير موجودة",
+"The same question appears twice":"السؤال نفسه مكرر",
+"Something else is wrong with this question":"مشكلة أخرى في هذا السؤال",
+"Problem in the question":"مشكلة في السؤال",
+"Sending your report…":"جارٍ إرسال بلاغك…",
 "Add your email":"أضف بريدك الإلكتروني",
 "Every account now needs an email. If you forget your password, a code sent to this email lets you choose a new one.":"كل حساب يحتاج الآن إلى بريد إلكتروني. إن نسيت كلمة المرور، يتيح لك رمز يُرسل إلى هذا البريد اختيار كلمة جديدة.",
 "A 6-digit code was sent to {}. It works for 15 minutes. Check the Spam folder too.":"أُرسل رمز من 6 أرقام إلى {1}. يعمل لمدة 15 دقيقة. تحقّق من مجلد الرسائل غير المرغوب فيها أيضًا.",
@@ -2703,8 +2716,11 @@ const Subjects=(()=>{
   return{classify,field,names:PSY.names.concat(OBG.names,['Other'])};
 })();
 /*SUBJECTS-END*/
+/* each question's subject is worked out once and remembered (19 Nov 2026): re-sorting 8,569 questions took 7 s on a phone at every view change */
+const SUBC_=new Map(),SUBV_='s1';let SUBC_t=null;
+function subSave(){clearTimeout(SUBC_t);SUBC_t=setTimeout(()=>kvPut('subc',[...SUBC_]),3000)}
 const FLD_=new Map();
-function rebuildQ(){
+function rebuildQ(){let subDirty=0;
   M.Q.clear();M.bookQ.clear();M.depQ=new Map();M.offQ=new Map();
   const byBook=new Map();
   const WB=pickOn()?new Set(pickList()):null;
@@ -2716,9 +2732,11 @@ function rebuildQ(){
     if(bk.dep){M.depQ.set(b,cs.flatMap(c=>c.qs.map(q=>({...q,b}))));continue} // Depository: not part of the question pool
     if(typeof bookOff==='function'&&bookOff(b)){M.offQ.set(b,cs.flatMap(c=>c.qs.map(q=>q.id)));continue} // an admin left this book out of their own study
     const fk=cs.map(c=>c.id+':'+(c.v||0)+':'+c.qs.length).join(',');let fld=FLD_.get(b);if(!fld||fld.k!==fk){fld={k:fk,f:Subjects.field(cs.flatMap(c=>c.qs))};FLD_.set(b,fld)}fld=fld.f; // each book gets the subjects of its own field (psychiatry, O&G, or its own chapters)
-    const list=[];for(const c of cs)for(const q of c.qs){const o={...q,b};o.sub=Subjects.classify(o,bk?.topics?.[o.t],fld);M.Q.set(q.id,o);list.push(q.id)}
+    const list=[];for(const c of cs)for(const q of c.qs){const o={...q,b},tn=bk?.topics?.[o.t],sk=SUBV_+'|'+c.id+':'+(c.v||0)+'|'+fld+'|'+(tn||'');const hit=SUBC_.get(q.id);
+      if(hit&&hit[0]===sk)o.sub=hit[1];else{o.sub=Subjects.classify(o,tn,fld);SUBC_.set(q.id,[sk,o.sub]);subDirty=1}M.Q.set(q.id,o);list.push(q.id)}
     M.bookQ.set(b,list)}
   for(const b of M.books.values())if(!b.dep&&!M.bookQ.has(b.id))M.bookQ.set(b.id,[]);
+  if(subDirty)subSave();
 }
 // the case (vignette) a question belongs to, printed above it
 function caseHTML(q){if(!q)return'';const v=typeof q.v==='string'?q.v:'';let out='';
@@ -4094,17 +4112,19 @@ const Admin=(()=>{
   return{A,view,act,change,load,uTable,users,stOf,fOk}})();
 /* ================= reports: wrong answer, explanation, any issue ================= */
 const REP={mine:[],busy:false};
-const REP_K={ans:'Wrong answer',expl:'Missing or wrong explanation',issue:'Issue'};
+const REP_K={ans:'Wrong answer',expl:'Missing or wrong explanation',q:'Problem in the question',issue:'Issue'};
 function repN(){return isAdm()&&ME?ME.rp||0:0}
 function repBtn(q){if(!q||!q.id||!ACC)return'';return`<button class="btn sm ghost repbtn" data-ad="repQ" data-id="${q.id}" title="Report a wrong answer, or a missing or wrong explanation">\u2691 Report</button>`}
 function repQInfo(id){const q=M.Q.get(id);if(!q)return null;const s=String(id),b=M.books.get(s.slice(0,s.lastIndexOf('.')));
   return{id:s,num:q.num||'',bn:b?b.name:'',s:String(q.s||'').slice(0,240),a:Array.isArray(q.a)&&Array.isArray(q.o)?q.a.map(i=>'ABCDEFGHIJ'[i]||'').join(', '):''}}
-function repQ(id){const q=repQInfo(id);if(!q)return;
+const REP_D=[['Answer',[['ans','ans','The marked answer is wrong'],['ans2','ans','More than one option is right'],['ans0','ans','None of the options is right']]],
+  ['Explanation',[['expl','expl','The explanation is missing'],['explw','expl','The explanation is wrong or does not match the answer'],['explc','expl','The explanation is cut off, or belongs to another question']]],
+  ['Question',[['qtxt','q','The question is cut off, has missing words or typos'],['qopt','q','An option is missing, repeated or cut off'],['qcase','q','The case, table or picture is missing'],['qdup','q','The same question appears twice'],['qoth','q','Something else is wrong with this question']]]];
+function repD(id){for(const [,L] of REP_D)for(const x of L)if(x[0]===id)return x;return null}
+function repQ(id){const q=repQInfo(id);if(!q)return;const keep=REP.draft&&REP.draft.id===id?REP.draft:null;REP.draft=null;
   modal(`<h3>Report this question</h3><p class="small muted" data-notr>${esc(q.bn)}${q.num?' · Q'+esc(q.num):''}</p>
-    <div class="stack" style="gap:8px;margin:8px 0">
-      <label class="row" style="gap:8px"><input type="radio" name="rep-k" value="ans" checked><span>The answer is wrong</span></label>
-      <label class="row" style="gap:8px"><input type="radio" name="rep-k" value="expl"><span>The explanation is missing or wrong</span></label></div>
-    <label class="field"><span>Details, for example which answer is right and why (optional)</span><textarea id="rep-m" rows="3" maxlength="1500"></textarea></label>
+    <div class="stack" style="gap:4px;margin:8px 0">${REP_D.map(([g,L])=>`<p class="lbl" style="margin:6px 0 0">${g}</p>${L.map(([d,,l])=>`<label style="display:flex;gap:8px;align-items:flex-start;padding:3px 0"><input type="radio" name="rep-k" value="${d}" ${(keep?keep.d===d:d==='ans')?'checked':''} style="flex:none;margin-top:3px"><span style="flex:1">${l}</span></label>`).join('')}`).join('')}</div>
+    <label class="field"><span>Details, for example which answer is right and why (optional)</span><textarea id="rep-m" rows="3" maxlength="1500">${esc(keep?keep.m:'')}</textarea></label>
     <p class="small muted">An admin checks every report. You will have a reply within 24 hours, under the bell at the top.</p>
     <div class="row" style="justify-content:flex-end"><button class="btn ghost" data-a="closeModal">Cancel</button><button class="btn pri" data-ad="repSend" data-id="${esc(q.id)}">Send report</button></div>`)}
 function repMine(){if(!REP.mine.length)return'';
@@ -4114,11 +4134,15 @@ function repIssue(){modal(`<h3>Report an issue</h3><p>Tell us what went wrong or
     <label class="field"><span>Your message</span><textarea id="rep-m" rows="5" maxlength="1500"></textarea></label>
     <div class="row" style="justify-content:flex-end"><button class="btn ghost" data-a="closeModal">Cancel</button><button class="btn pri" data-ad="repSend" data-id="">Send</button></div>
     <div id="rep-mine">${repMine()}</div>`);repLoad()}
-async function repSend(id){if(REP.busy)return;if(!S.on)return toast('Reports need an internet connection.',5000);
-  const m=(($('#rep-m')||{}).value||'').trim(),kr=document.querySelector('input[name=rep-k]:checked'),x={k:id?(kr?kr.value:'ans'):'issue',m};
-  if(!id&&m.length<3)return toast('Describe the issue first.');
+async function repSend(id){if(!S.on)return toast('Reports need an internet connection.',5000);
+  const m0=(($('#rep-m')||{}).value||'').trim(),kr=document.querySelector('input[name=rep-k]:checked'),dd=id?repD(kr?kr.value:'ans'):null;
+  if(!id&&m0.length<3)return toast('Describe the issue first.');
+  const x={k:id?dd[1]:'issue',m:id?(dd[2]+(m0?'\n'+m0:'')).slice(0,1500):m0};if(dd)x.d=dd[0];
   if(id){x.q=repQInfo(id);if(!x.q)return}
-  REP.busy=true;try{await gas('rep_add',x);closeModal();toast('Report sent. You will have a reply within 24 hours.',6000)}catch(e){toast('Could not send: '+cleanErr(e),7000)}finally{REP.busy=false}}
+  closeModal();toast(id?'Sending your report…':'Sending…',3000); // the window closes at once; Google takes a few seconds (19 Nov 2026)
+  try{try{await gas('rep_add',x)}catch(e){if(x.k==='q'&&/bad report/.test(String(e&&e.message||e))){x.k='ans';await gas('rep_add',x)}else throw e} // a server from before 19 Nov knows no 'q'
+    toast('Report sent. You will have a reply within 24 hours.',6000)}
+  catch(e){toast('Could not send: '+cleanErr(e),8000);if(id){REP.draft={id,d:dd[0],m:m0};repQ(id)}else{repIssue();const t=$('#rep-m');if(t)t.value=m0}}}
 function helpPanel(){if(!ACC)return'';return`<div class="panel" id="helppanel"><h3>Help</h3><p class="small">Something not working, or a question about your account? Send it to the admins. You will have a reply within 24 hours.</p><div class="row"><button class="btn" data-ad="repIssue">Report an issue</button></div></div>`}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-ad]');if(!el||el.disabled)return;const k=el.dataset.ad,d=el.dataset;
   if(el.tagName==='INPUT'&&el.type==='radio'){Admin.act(k,d,el);return}
@@ -4386,6 +4410,7 @@ async function boot(){
   S.cur=(await kvGet('cur'))||null;try{S.style=localStorage.getItem('mv-style')||'mingle';S.qtype=localStorage.getItem('mv-qtype')||'both'}catch(e){S.style='mingle';S.qtype='both'}S.lastCheck=(await kvGet('lastCheck'))||null;
   for(const b of (await kvGet('books'))||[])M.books.set(b.id,b);
   for(const [k,c] of await IDB.all('chunks'))M.chunks.set(k,c);
+  try{for(const [k,v] of (await kvGet('subc'))||[])SUBC_.set(k,v)}catch(e){}
   for(const [k,d] of await IDB.all('logs')){d._size=d._size||JSON.stringify(d.at).length+500;M.logs.set(k,d)}
   for(const p of (await kvGet('pending'))||[])S.pending.add(p);S.outbox=(await kvGet('outbox'))||[];S.unsent=(await kvGet('unsent'))||0;
   rebuildQ();rebuildAtt();await readerBoot();
