@@ -3373,7 +3373,7 @@ function authPaint(msg){
   else if(m==='in')body=`${authField('au-u','Username','text',{ac:'username',v:vals.u})}${authField('au-p','Password','password',{ac:'current-password',v:vals.p})}
     <div class="row"><button class="btn pri" data-u="go">Sign in</button></div>${AUTH.prevUser?`<p class="muted small">You were signed out on this device (the password was changed, or "Sign out on every device" was used). Everything you did here is kept and uploads once you sign in.</p>`:''}`;
   else if(m==='up')body=`<p class="muted small">Create your account, choose your specialty, and try the first questions free.</p>
-    ${authField('au-u','Username','text',{ac:'username',v:vals.u,hint:'3 to 30 letters or numbers, no spaces.'})}${authField('au-p','Password','password',{ac:'new-password',hint:PW,v:vals.p})}${authEmail(st,vals)}
+    ${authField('au-u','Username','text',{ac:'username',v:vals.u,hint:'3 to 30 letters or numbers, no spaces.'})}${authField('au-p','Password','password',{ac:'new-password',hint:PW,v:vals.p})}${st.otp===false?authField('au-w','Recovery word','text',{ac:'off',hint:WORD,v:vals.w}):''}${authEmail(st,vals)}
     <div class="row"><button class="btn pri" data-u="go">Create account</button></div>`;
   else if(m==='forgot')body=`<p class="muted small">Only for older accounts that have no email: type your username, your recovery word and a new password.</p>
     ${authField('au-u','Username','text',{ac:'username',v:vals.u})}${authField('au-w','Recovery word','text',{ac:'off',v:vals.w})}${authField('au-p','New password','password',{ac:'new-password',hint:PW,v:vals.p})}
@@ -3395,7 +3395,7 @@ async function authGo(kind){
   if(!a.u){AUTH.err='Type your username.';return authPaint()}
   const op=kind==='mailcode'?'mailcode':m==='setup'?'setup':m==='up'?'signup':m==='forgot'?'recover':m==='mail'?'mailreset':'login';
   if(op!=='mailcode'&&!a.p){AUTH.err='Type '+(m==='in'?'your':'a new')+' password.';return authPaint()}
-  if((op==='setup'||op==='recover')&&!a.w.trim()){AUTH.err='Type '+(op==='recover'?'your':'a')+' recovery word.';return authPaint()}
+  if((op==='setup'||op==='recover'||(op==='signup'&&AUTH.st&&AUTH.st.otp===false))&&!a.w.trim()){AUTH.err='Type '+(op==='recover'?'your':'a')+' recovery word.';return authPaint()}
   if(op==='signup'&&AUTH.st&&AUTH.st.otp!==false&&!a.e){AUTH.err='Type your email.';return authPaint()}
   if(op==='signup'&&a.e&&!a.c.trim()){AUTH.err='Press Send code, then type the code from the email.';return authPaint()}
   AUTH.busy=true;authPaint();
