@@ -2110,6 +2110,10 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Loading the figure…":"جارٍ تحميل الشكل…",
+"The figure loads when you are online.":"يُحمَّل الشكل عند اتصالك بالإنترنت.",
+"The figure could not be loaded. Open the question again to retry.":"تعذّر تحميل الشكل. افتح السؤال مرة أخرى للمحاولة.",
+"Loading the figures to print…":"جارٍ تحميل الأشكال للطباعة…",
 "Your saved questions and your notebook.":"أسئلتك المحفوظة ودفتر ملاحظاتك.",
 "Opening Deep Focus…":"جارٍ فتح التركيز العميق…",
 "Deep Focus keeps your saved questions and your notebook, for revising one topic deeply.":"يحفظ التركيز العميق أسئلتك المحفوظة ودفتر ملاحظاتك، لمراجعة موضوع واحد بعمق.",
@@ -2837,7 +2841,7 @@ const GasCloud={
   putBook:(id,body)=>gas('api_put','books',id,body),
   putChunk:(id,body)=>gas('api_put','chunks',id,body),
   delChunk:id=>gas('api_del','chunks',id),
-  async getChunks(ids){return gas('api_get','chunks',ids)},
+  async getChunks(ids){return gas('api_get','chunks',ids,{lazy:1})},
   async checkChunks(ids){return gas('api_check',ids)},
   async changes(since){return gas('api_changes',since)},
   async logCounts(){return gas('api_logCounts')},
@@ -6610,7 +6614,20 @@ async function impFinish(){const I=S.imp,P=I.plan;
 function docCount(){let n=M.books.size;for(const b of M.books.values())n+=(b.chunks||[]).length;n+=M.logs.size;return n}
 
 /* ---- book-level coverage (all imports combined) ---- */
-function figHTML(q){return q.img&&q.img.length?`<div class="figs">${q.img.map((src,k)=>/^data:image\/(?:jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(src)?`<img data-a="figzoom" title="Tap to enlarge" src="${src}" alt="Figure or table from the book${q.p?', page '+q.p:''}${q.img.length>1?' (part '+(k+1)+')':''}" loading="lazy">`:'').join('')}</div>`:''}
+/* ----- a question's pictures come only when it is shown (p39): blocks arrive without them, q.im = how many ----- */
+const FIGQ={want:new Set(),t:null,busy:false};
+function figNeed(q){return !!(q&&q.im&&!(q.img&&q.img.length))}
+function figWant(id){FIGQ.want.add(id);clearTimeout(FIGQ.t);FIGQ.t=setTimeout(()=>figFetch([...FIGQ.want]).catch(()=>{}),60)}
+async function figFetch(ids){ids=ids.filter(id=>figNeed(M.Q.get(id)));for(const id of ids)FIGQ.want.delete(id);if(!ids.length)return;
+  if(!S.on){figPaint(ids);return}
+  const want=new Set(ids),pairs=[];for(const c of M.chunks.values())for(const q of c.qs||[])if(want.has(q.id))pairs.push([c.id,q.id]);
+  for(let i=0;i<pairs.length;i+=20){let got={};try{got=await gas('api_img',pairs.slice(i,i+20))||{}}catch(e){console.warn('img',e)}
+    const touched=new Set();for(const [cid,qid] of pairs.slice(i,i+20)){const im=got[qid];if(!im||!im.length)continue;const c=M.chunks.get(cid);const x=c&&(c.qs||[]).find(q=>q.id===qid);if(x){x.img=im;touched.add(cid)}const q=M.Q.get(qid);if(q)q.img=im}
+    for(const cid of touched){const c=M.chunks.get(cid);if(c)await IDB.put('chunks',cid,c).catch(()=>{})}}
+  figPaint(ids)}
+function figPaint(ids){for(const id of ids){const q=M.Q.get(id);for(const el of document.querySelectorAll(`[data-figq="${CSS.escape(id)}"]`))el.outerHTML=figNeed(q)?`<div class="figs" data-figq="${esc(id)}"><span class="small muted">${S.on?'The figure could not be loaded. Open the question again to retry.':'The figure loads when you are online.'}</span></div>`:figHTML(q)}}
+async function figPrep(){try{const o=prRead();if(!o.fig)return;const ids=prPick(PR.src,o).map(x=>x.id).filter(id=>figNeed(M.Q.get(id)));if(ids.length){toast('Loading the figures to print…',4000);await figFetch(ids)}}catch(e){console.warn('figPrep',e)}}
+function figHTML(q){if(figNeed(q)){figWant(q.id);return`<div class="figs" data-figq="${esc(q.id)}"><span class="small muted">${S.on?'Loading the figure\u2026':'The figure loads when you are online.'}</span></div>`}return q.img&&q.img.length?`<div class="figs">${q.img.map((src,k)=>/^data:image\/(?:jpeg|png);base64,[A-Za-z0-9+/=]+$/.test(src)?`<img data-a="figzoom" title="Tap to enlarge" src="${src}" alt="Figure or table from the book${q.p?', page '+q.p:''}${q.img.length>1?' (part '+(k+1)+')':''}" loading="lazy">`:'').join('')}</div>`:''}
 function bookCoverage(b){
   const reps=b.imports||[];if(!reps.length)return null;const unit=reps[reps.length-1].unit;const rs=lastImports(b).filter(r=>r.unit===unit); // only the newest read of each page range counts
   const T=Math.max(...rs.map(r=>r.total||0));if(!T)return null;const arr=new Array(T).fill('-');
@@ -7643,8 +7660,8 @@ document.addEventListener('click',async e=>{
     case'saveDev':S.devName=$('#devname').value.trim()||guessDevice();await kvPut('devName',S.devName);toast('Saved');render();break;
     case'backup':await backup(d.k,!!d.local);break;
     case'print':openPrint(d.k==='sess'?{k:'sess',id:d.id}:d.k==='bank'?{k:'bank'}:{k:'book',b:d.b,t:d.t,list:!!d.list});break;
-    case'prGo':prGo();break;
-    case'prFile':prFile();break;
+    case'prGo':figPrep().then(prGo);break;
+    case'prFile':figPrep().then(prFile);break;
     case'accPw':case'accWord':case'accOut':case'accReload':case'accPwGo':case'accWordGo':case'accOutGo':case'accSetPw':case'accSetPwGo':case'accDel':case'accDelGo':case'accRestore':case'accBackup':await accAct(a,d);break;
   }
 });
