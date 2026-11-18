@@ -389,7 +389,7 @@ html.ar .langbtn{font-family:"Manrope",sans-serif}
 .mark.bulb{background:#0E1116;color:#F2B544}
 .mark.bulb svg{display:block}
 /* v47: admin tab, activation, specialty chooser, bell */
-#gateov,#onbov{position:fixed;inset:0;z-index:68;background:var(--bg);overflow:auto;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+#gateov,#onbov,#emov{position:fixed;inset:0;z-index:68;background:var(--bg);overflow:auto;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px))}
 #onbov{z-index:66}.auth.onb{max-width:560px}
 .splist{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:6px;max-height:46vh;overflow:auto;margin:10px 0;padding:2px}
 .spopt,.exopt{border:1px solid var(--line);background:var(--surface-2);color:var(--ink);border-radius:10px;padding:10px 12px;text-align:start;font:inherit;font-weight:600;cursor:pointer;min-height:44px}
@@ -2110,6 +2110,15 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Add your email":"أضف بريدك الإلكتروني",
+"Every account now needs an email. If you forget your password, a code sent to this email lets you choose a new one.":"كل حساب يحتاج الآن إلى بريد إلكتروني. إن نسيت كلمة المرور، يتيح لك رمز يُرسل إلى هذا البريد اختيار كلمة جديدة.",
+"A 6-digit code was sent to {}. It works for 15 minutes. Check the Spam folder too.":"أُرسل رمز من 6 أرقام إلى {1}. يعمل لمدة 15 دقيقة. تحقّق من مجلد الرسائل غير المرغوب فيها أيضًا.",
+"Forgot the recovery word too? Ask an admin to set a new password for you.":"نسيت كلمة الاسترداد أيضًا؟ اطلب من أحد المشرفين تعيين كلمة مرور جديدة لك.",
+"Back to the email code":"العودة إلى رمز البريد",
+"An older account with no email?":"حساب قديم بلا بريد إلكتروني؟",
+"Use the recovery word":"استخدم كلمة الاسترداد",
+"Only for older accounts that have no email: type your username, your recovery word and a new password.":"للحسابات القديمة التي لا تملك بريدًا فقط: اكتب اسم المستخدم وكلمة الاسترداد وكلمة مرور جديدة.",
+"This account has no recovery word. Use the email code instead.":"لا توجد كلمة استرداد لهذا الحساب. استخدم رمز البريد بدلًا منها.",
 "Loading the figure…":"جارٍ تحميل الشكل…",
 "The figure loads when you are online.":"يُحمَّل الشكل عند اتصالك بالإنترنت.",
 "The figure could not be loaded. Open the question again to retry.":"تعذّر تحميل الشكل. افتح السؤال مرة أخرى للمحاولة.",
@@ -3353,7 +3362,7 @@ function authPaint(msg){
   const vals={u:keep('au-u')??(AUTH.prevUser||''),p:same?keep('au-p')||'':'',w:same?keep('au-w')||'':'',c:same?keep('au-c')||'':'',e:same?keep('au-e')||'':''};
   const PW='At least 4 characters.';
   const WORD='A word or short phrase only you know (for example the name of your first school). If you forget your password, this word lets you set a new one. Capitals and spaces do not matter.';
-  const tabs=st&&m!=='setup'?`<div class="seg auth-tabs">${[['in','Sign in'],...(st.open?[['up','Create account']]:[]),['forgot','Forgot password']].map(([k,l])=>`<label><input type="radio" name="authm" data-u="mode" value="${k}" ${m===k||(m==='mail'&&k==='forgot')?'checked':''}><span>${l}</span></label>`).join('')}</div>`:'';
+  const tabs=st&&m!=='setup'?`<div class="seg auth-tabs">${[['in','Sign in'],...(st.open?[['up','Create account']]:[]),['mail','Forgot password']].map(([k,l])=>`<label><input type="radio" name="authm" data-u="mode" value="${k}" ${m===k||(m==='forgot'&&k==='mail')?'checked':''}><span>${l}</span></label>`).join('')}</div>`:'';
   let body='';
   if(msg)body=`<p class="muted">${esc(msg)}</p>`;
   else if(!st)body=`<div class="notice bad">${esc(AUTH.err)}</div><div class="row"><button class="btn pri" data-u="retry">Try again</button></div>`;
@@ -3364,17 +3373,17 @@ function authPaint(msg){
   else if(m==='in')body=`${authField('au-u','Username','text',{ac:'username',v:vals.u})}${authField('au-p','Password','password',{ac:'current-password',v:vals.p})}
     <div class="row"><button class="btn pri" data-u="go">Sign in</button></div>${AUTH.prevUser?`<p class="muted small">You were signed out on this device (the password was changed, or "Sign out on every device" was used). Everything you did here is kept and uploads once you sign in.</p>`:''}`;
   else if(m==='up')body=`<p class="muted small">Create your account, choose your specialty, and try the first questions free.</p>
-    ${authField('au-u','Username','text',{ac:'username',v:vals.u,hint:'3 to 30 letters or numbers, no spaces.'})}${authField('au-p','Password','password',{ac:'new-password',hint:PW,v:vals.p})}${authField('au-w','Recovery word','text',{ac:'off',hint:WORD,v:vals.w})}${authEmail(st,vals)}
+    ${authField('au-u','Username','text',{ac:'username',v:vals.u,hint:'3 to 30 letters or numbers, no spaces.'})}${authField('au-p','Password','password',{ac:'new-password',hint:PW,v:vals.p})}${authEmail(st,vals)}
     <div class="row"><button class="btn pri" data-u="go">Create account</button></div>`;
-  else if(m==='forgot')body=`<p class="muted small">Type your username, your recovery word and a new password.</p>
+  else if(m==='forgot')body=`<p class="muted small">Only for older accounts that have no email: type your username, your recovery word and a new password.</p>
     ${authField('au-u','Username','text',{ac:'username',v:vals.u})}${authField('au-w','Recovery word','text',{ac:'off',v:vals.w})}${authField('au-p','New password','password',{ac:'new-password',hint:PW,v:vals.p})}
     <div class="row"><button class="btn pri" data-u="go">Set new password and sign in</button></div>
-    <p class="muted small">Forgot the recovery word too? If your account has an email, get a code by email instead: <button class="linkbtn" data-u="mode" data-k="mail">email me a code</button>. No email on the account: ask an admin to set a new password for you.</p>`;
+    <p class="muted small">Forgot the recovery word too? Ask an admin to set a new password for you. <button class="linkbtn" data-u="mode" data-k="mail">Back to the email code</button></p>`;
   else if(m==='mail')body=AUTH.mailTo?`<p>A 6-digit code was sent to <b>${esc(AUTH.mailTo)}</b>. It works for 15 minutes.</p>
     ${authField('au-u','Username','text',{ac:'username',v:vals.u})}${authField('au-c','Code from the email','text',{ac:'one-time-code',v:vals.c})}${authField('au-p','New password','password',{ac:'new-password',hint:PW,v:vals.p})}
     <div class="row"><button class="btn pri" data-u="go">Set new password and sign in</button><button class="btn" data-u="mailcode">Send another code</button></div>`
     :`<p class="muted small">A code goes to the email saved on your account.</p>${authField('au-u','Username','text',{ac:'username',v:vals.u})}
-    <div class="row"><button class="btn pri" data-u="mailcode">Email me a code</button><button class="btn" data-u="mode" data-k="forgot">Back</button></div>`;
+    <div class="row"><button class="btn pri" data-u="mailcode">Email me a code</button></div><p class="muted small">An older account with no email? <button class="linkbtn" data-u="mode" data-k="forgot">Use the recovery word</button></p>`;
   ov.innerHTML=`<div class="auth"><div class="auth-brand"><span class="mark bulb"><svg viewBox="0 0 512 512" width="24" height="24" aria-hidden="true"><g stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none"><path d="M256 28v30M362 73l-18 22M150 73l18 22M445 187l-28 6M67 187l28 6"/><path stroke-width="30" d="M256 92C176 92 126 152 126 218c0 48 28 78 52 106 16 20 22 38 22 58h112c0-20 6-38 22-58 24-28 52-58 52-106 0-66-50-126-130-126Z"/><path stroke-width="30" d="M212 412h88M228 446h56"/><path stroke-width="30" d="M222 196c0-22 14-36 36-36s36 14 36 34c0 30-36 30-36 62M258 300v2"/></g></svg></span>MCQ Vault${window.MV_TEST||(st&&st.test)?' <span class="pill bad">TEST COPY</span>':''}<button type="button" class="themebtn langbtn" data-auth-lang data-notr style="margin-inline-start:10px">${I18N.lang==='ar'?'English':'العربية'}</button></div>
     <div class="panel auth-card"><h2>${m==='setup'?'Set up your account':m==='up'?'Create an account':m==='forgot'||m==='mail'?'New password':'Sign in'}</h2>${tabs}
     ${AUTH.err&&st?`<div class="notice bad">${esc(AUTH.err)}</div>`:''}${AUTH.ok?`<div class="notice info">${esc(AUTH.ok)}</div>`:''}${body}</div></div>`;
@@ -3386,8 +3395,8 @@ async function authGo(kind){
   if(!a.u){AUTH.err='Type your username.';return authPaint()}
   const op=kind==='mailcode'?'mailcode':m==='setup'?'setup':m==='up'?'signup':m==='forgot'?'recover':m==='mail'?'mailreset':'login';
   if(op!=='mailcode'&&!a.p){AUTH.err='Type '+(m==='in'?'your':'a new')+' password.';return authPaint()}
-  if((op==='setup'||op==='signup'||op==='recover')&&!a.w.trim()){AUTH.err='Type '+(op==='recover'?'your':'a')+' recovery word.';return authPaint()}
-  if(op==='signup'&&AUTH.st&&AUTH.st.otp&&!a.e){AUTH.err='Type your email.';return authPaint()}
+  if((op==='setup'||op==='recover')&&!a.w.trim()){AUTH.err='Type '+(op==='recover'?'your':'a')+' recovery word.';return authPaint()}
+  if(op==='signup'&&AUTH.st&&AUTH.st.otp!==false&&!a.e){AUTH.err='Type your email.';return authPaint()}
   if(op==='signup'&&a.e&&!a.c.trim()){AUTH.err='Press Send code, then type the code from the email.';return authPaint()}
   AUTH.busy=true;authPaint();
   try{const r=await pub(op,a);AUTH.busy=false;
@@ -3614,7 +3623,7 @@ function streakPaint(){let b=$('#streakbtn');const bell=$('#bellbtn');let n=0;tr
 async function meLoad(){if(!ACC||!ACC.t||Cloud.mode!=='gas')return null;try{const st=await gas('acc_state',{di:devId()});meSet(st);return st}catch(e){console.warn('me',e);return null}}
 function meApply(){document.body.classList.toggle('role-user',!isAdm()||stuView());document.body.classList.toggle('role-adm',isAdm()&&!stuView());document.body.classList.toggle('stu',isAdm()&&stuView());
   if((!isAdm()||stuView())&&(S.view==='depository'||S.view==='admin'))S.view='study';try{viewBtn()}catch(e){}
-  try{renderTabs()}catch(e){}bellPaint();if(!gateCheck()){onbCheck();let ask=false;try{ask=sessionStorage.getItem('mv-askview')==='1';if(ask&&ME&&!isAdm())sessionStorage.removeItem('mv-askview')}catch(e){}if(ask&&isAdm()&&ACC&&ME&&!$('#onbov')&&!$('#authov')){try{sessionStorage.removeItem('mv-askview')}catch(e){}viewPick()}}}
+  try{renderTabs()}catch(e){}bellPaint();if(!gateCheck()&&!emReqCheck()){onbCheck();let ask=false;try{ask=sessionStorage.getItem('mv-askview')==='1';if(ask&&ME&&!isAdm())sessionStorage.removeItem('mv-askview')}catch(e){}if(ask&&isAdm()&&ACC&&ME&&!$('#onbov')&&!$('#authov')){try{sessionStorage.removeItem('mv-askview')}catch(e){}viewPick()}}}
 function meBoot(){ME=meCached();statsBoot();if(!ME&&ACC)ME={u:ACC.u,n:ACC.n,own:!!ACC.own,adm:!!(ACC.own||ACC.adm),sp:ACC.sp||'',ex:ACC.ex||'',act:0,lock:'',trial:null,contact:''};
   document.body.classList.toggle('role-user',!isAdm());document.body.classList.toggle('role-adm',isAdm())}
 const BRAND=()=>`<div class="auth-brand"><span class="mark bulb"><svg viewBox="0 0 512 512" width="24" height="24" aria-hidden="true"><g stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none"><path d="M256 28v30M362 73l-18 22M150 73l18 22M445 187l-28 6M67 187l28 6"/><path stroke-width="30" d="M256 92C176 92 126 152 126 218c0 48 28 78 52 106 16 20 22 38 22 58h112c0-20 6-38 22-58 24-28 52-58 52-106 0-66-50-126-130-126Z"/><path stroke-width="30" d="M212 412h88M228 446h56"/><path stroke-width="30" d="M222 196c0-22 14-36 36-36s36 14 36 34c0 30-36 30-36 62M258 300v2"/></g></svg></span>MCQ Vault<button type="button" class="themebtn langbtn" data-auth-lang data-notr style="margin-inline-start:10px">${I18N.lang==='ar'?'English':'العربية'}</button></div>`;
@@ -3770,6 +3779,15 @@ function profilePanel(){if(!ACC||!ME)return'';
     <p class="small" style="margin-top:8px">Email: <b data-notr>${esc(ME.e||'—')}</b> <button class="linkbtn" data-ad="emailOpen">${ME.e?'Change email':'Add an email'}</button></p>
     <p class="muted small">With an email on your account you can reset a forgotten password by yourself.</p>
     </div>`}
+/* ----- an account without an email (from before 18 Nov 2026) adds and confirms one after signing in ----- */
+function emReqNeed(){return !!(ACC&&ME&&!ME.own&&ME.eq&&!ME.e)}
+function emReqCheck(){const ov=$('#emov');if(!emReqNeed()){if(ov)ov.remove();return false}if(ov)return true;if($('#authov')||$('#gateov')||$('#onbov'))return true;emReqPaint('');return true}
+function emReqPaint(sent){let ov=$('#emov');const e=($('#em-e')||{}).value||'',c=($('#em-c')||{}).value||'';if(!ov){ov=document.createElement('div');ov.id='emov';ov.setAttribute('role','dialog');document.body.appendChild(ov)}
+  ov.innerHTML=`<div class="auth onb">${BRAND()}<div class="panel auth-card"><h2>Add your email</h2>
+    <p class="muted small">Every account now needs an email. If you forget your password, a code sent to this email lets you choose a new one.</p>
+    <label class="field"><span>Email</span><input id="em-e" type="email" autocomplete="email" value="${esc(e)}" style="font-size:16px"></label>
+    ${sent?`<p class="small">A 6-digit code was sent to <b data-notr>${esc(sent)}</b>. It works for 15 minutes. Check the Spam folder too.</p><label class="field"><span>Code from the email</span><input id="em-c" type="text" inputmode="numeric" autocomplete="one-time-code" value="${esc(c)}" style="font-size:16px"></label>`:''}
+    <div class="row"><button class="btn${sent?'':' pri'}" data-ad="emailSend">${sent?'Send another code':'Send code'}</button>${sent?`<button class="btn pri" data-ad="emailSave">Save email</button>`:''}<button class="btn ghost" data-ad="gateOut">Sign out</button></div></div></div>`}
 function emailModal(sent){const e=($('#em-e')||{}).value||'';modal(`<h3>Email for this account</h3>
   <label class="field"><span>Email</span><input id="em-e" type="email" autocomplete="email" value="${esc(e)}" style="font-size:16px"></label>
   ${sent?`<p class="small">A 6-digit code was sent to <b data-notr>${esc(sent)}</b>. It works for 15 minutes.</p><label class="field"><span>Code from the email</span><input id="em-c" type="text" inputmode="numeric" autocomplete="one-time-code" style="font-size:16px"></label>`:''}
@@ -3846,7 +3864,7 @@ function examOpts(){const P=[[50,50],[100,100],[150,150],[200,120],[300,180]];
     <div class="row" style="gap:6px;margin-top:6px">${P.map(([n,m])=>`<button type="button" class="btn sm${EXAM.n===n&&EXAM.min===m?' pri':''}" data-ad="examPre" data-n="${n}" data-m="${m}"><span data-notr>${n} / ${m}</span></button>`).join('')}<span class="muted small">questions / minutes</span></div></div>`}
 
 /* ----- sign-up helpers: email code and Google ----- */
-function authEmail(st,vals){const req=!!st.otp;
+function authEmail(st,vals){const req=st.otp!==false;
   return`${authField('au-e',req?'Email':'Email (optional)','email',{ac:'email',v:vals.e,hint:req?'A 6-digit code is sent to this email to confirm it.':'With an email you can reset a forgotten password by yourself. A 6-digit code confirms it.'})}
     <div class="row"><button class="btn sm" data-u="otp">${AUTH.otpTo?'Send another code':'Send code'}</button>${AUTH.otpTo?`<span class="small">Code sent to <b data-notr>${esc(AUTH.otpTo)}</b></span>`:''}</div>
     ${AUTH.otpTo||vals.c?authField('au-c','Code from the email','text',{ac:'one-time-code',v:vals.c}):''}`}
@@ -4134,7 +4152,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-ad]');if(
   if(k==='examPre'){examSet(d.n,d.m);render();return}
   if(k==='emailOpen')return emailModal('');
   if(k==='emailSend'||k==='emailSave'){const em=(($('#em-e')||{}).value||'').trim(),c=(($('#em-c')||{}).value||'').trim();if(!em)return toast('Type your email.');if(k==='emailSave'&&!c)return toast('Type the code from the email.');
-    gas('acc_email',k==='emailSave'?{e:em,c}:{e:em,lang:I18N.lang}).then(r=>{if(k==='emailSave'){meSet(r);closeModal();toast('Email saved.');render()}else emailModal(r.to)},x=>toast('Could not do that: '+cleanErr(x),6000));return}
+    gas('acc_email',k==='emailSave'?{e:em,c}:{e:em,lang:I18N.lang}).then(r=>{if(k==='emailSave'){const g=$('#emov');if(g)g.remove();meSet(r);closeModal();toast('Email saved.');render()}else if($('#emov'))emReqPaint(r.to);else emailModal(r.to)},x=>toast('Could not do that: '+cleanErr(x),6000));return}
   Admin.act(k,d,el)});
 document.addEventListener('change',e=>{const t=e.target;if(t.dataset&&t.dataset.adc)return Admin.change(t);
   if(t.id==='adm-f'){Admin.A.f=t.value;render();return}
