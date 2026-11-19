@@ -2110,6 +2110,7 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Approve: send this reply":"موافقة: إرسال هذا الرد",
 "Fixed by the checker":"صحّحه المدقق",
 "Undone":"تم التراجع",
 "Undo this fix":"التراجع عن هذا التصحيح",
@@ -3933,7 +3934,7 @@ const Admin=(()=>{
       ${ai.e?`<br><span>New explanation:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.e)}</span>`:''}
       ${ai.src?`<br><span class="muted small">Source in the book:</span> <span class="small" data-notr>${esc(ai.src)}</span>`:''}
       ${ai.reply?`<br><span class="muted small">Suggested reply:</span> <span class="small" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.reply)}</span>`:''}
-      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Approve and apply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
+      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Approve and apply</button>`:''}${ai.verdict!=='fix'&&ai.reply?`<button class="btn sm pri" data-ad="admRepOk" data-k="${esc(r.id)}">Approve: send this reply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
   function vRep(){const L=A.reps||[],op=L.filter(r=>r.st!=='done'),dn=L.filter(r=>r.st==='done').slice(0,40);
     const card=r=>`<div class="nitem" data-rep="${esc(r.id)}"><div class="spread"><span><span class="pill ${r.k==='issue'?'acc':'bad'}">${REP_K[r.k]||'Issue'}</span> <b data-notr>${esc(r.n||r.u)}</b> <span class="muted small" data-notr>(${esc(r.u)})</span></span><span class="muted small">${fmtDate(r.at)}</span></div>
       ${repFull(r)}
@@ -4090,6 +4091,7 @@ const Admin=(()=>{
         const to=w==='adm'?{adm:1}:w.startsWith('sp:')?{sp:w.slice(3)}:w.startsWith('u:')?{u:w.slice(2)}:{};await gas('adm_note',{t,m,to,l:val('nt-l').trim()});toast('Notification sent.');await load(true);notesLoad();return}
       if(k==='admRepUse'){const r=(A.reps||[]).find(o=>o.id===d.k),el=$('#rr-'+d.k);if(r&&r.ai&&el){el.value=r.ai.reply;el.focus()}return}
       if(k==='admRepApply'){await gas('adm_rep',{id:d.k,apply:1,m:val('rr-'+d.k).trim()});toast('Applied. The question is corrected for everyone, and the user has been told.',6000);await load(true);if(S.on)pull(false);return}
+      if(k==='admRepOk'){const r=(A.reps||[]).find(x=>x.id===d.k);if(!r||!r.ai||!r.ai.reply)return;await gas('adm_rep',{id:d.k,m:r.ai.reply});toast('Reply sent.');await load(true);return}
       if(k==='admRepUndo'){await gas('adm_rep',{id:d.k,undo:1});toast('Undone. The question has its old text again, and the report is open.',6000);await load(true);if(S.on)pull(true);return}
       if(k==='admRepRecheck'){await gas('adm_rep',{id:d.k,recheck:1});toast('Sent back to the checker.');await load(true);return}
       if(k==='admRepSend'||k==='admRepClose'||k==='admRepOpen'||k==='admRepDel'){const m=k==='admRepSend'?val('rr-'+d.k).trim():'';if(k==='admRepSend'&&!m)return toast('Type your reply first.');
