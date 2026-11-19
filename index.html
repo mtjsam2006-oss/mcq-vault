@@ -2110,6 +2110,14 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Fixed by the checker":"صحّحه المدقق",
+"Undone":"تم التراجع",
+"Undo this fix":"التراجع عن هذا التصحيح",
+"Could not apply it by itself:":"تعذّر تطبيقه تلقائيًا:",
+"Corrected question:":"السؤال المصحّح:",
+"Corrected options:":"الخيارات المصحّحة:",
+"Corrected case:":"الحالة المصحّحة:",
+"Undone. The question has its old text again, and the report is open.":"تم التراجع. عاد السؤال إلى نصه السابق، والبلاغ مفتوح.",
 "The marked answer is wrong":"الإجابة المحددة خاطئة",
 "More than one option is right":"أكثر من خيار صحيح",
 "None of the options is right":"لا يوجد خيار صحيح",
@@ -3915,13 +3923,17 @@ const Admin=(()=>{
       ${q.v?`<p class="small muted" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.v)}</p>`:''}<p data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.s)}</p><ol type="A" class="small" data-notr>${(q.o||[]).map((o,i)=>`<li${(q.a||'').includes('ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i])?' style="font-weight:700"':''}>${esc(o)}</li>`).join('')}</ol>
       ${q.e?`<p class="small"><span class="muted">Explanation in the app:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.e)}</span></p>`:`<p class="small muted">No explanation in the app.</p>`}</details>`}
   function repAi(r){const ai=r.ai;if(r.st==='done'&&!ai)return'';if(!ai)return`<p class="small muted" style="margin:6px 0 0">Waiting for the checker. It runs every hour and reads the book.</p>`;const v=AIV[ai.verdict]||AIV.unsure;
-    return`<div class="notice info repai" style="margin-top:6px"><b>The checker recommends</b> <span class="pill ${v[0]}">${v[1]}</span>${r.applied?` <span class="pill ok">Applied</span>`:''}
+    return`<div class="notice info repai" style="margin-top:6px"><b>The checker recommends</b> <span class="pill ${v[0]}">${v[1]}</span>${r.applied?` <span class="pill ok">${r.applied.by==='checker'?'Fixed by the checker':'Applied'}</span>`:''}${r.undone?` <span class="pill warn">Undone</span>`:''}
       ${ai.why?`<br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.why)}</span>`:''}
+      ${ai.err?`<br><span class="small" style="color:var(--bad,#c33)">Could not apply it by itself: <span data-notr>${esc(ai.err)}</span></span>`:''}
+      ${ai.s?`<br><span>Corrected question:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.s)}</span>`:''}
+      ${ai.o?`<br><span>Corrected options:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${ai.o.map((x,i)=>'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i]+'. '+esc(x)).join('<br>')}</span>`:''}
+      ${ai.v?`<br><span>Corrected case:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.v)}</span>`:''}
       ${ai.a?`<br><span>Change the answer to:</span> <b data-notr>${esc(ai.a)}</b>`:''}
       ${ai.e?`<br><span>New explanation:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.e)}</span>`:''}
       ${ai.src?`<br><span class="muted small">Source in the book:</span> <span class="small" data-notr>${esc(ai.src)}</span>`:''}
       ${ai.reply?`<br><span class="muted small">Suggested reply:</span> <span class="small" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.reply)}</span>`:''}
-      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Approve and apply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}</div>`}
+      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Approve and apply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
   function vRep(){const L=A.reps||[],op=L.filter(r=>r.st!=='done'),dn=L.filter(r=>r.st==='done').slice(0,40);
     const card=r=>`<div class="nitem" data-rep="${esc(r.id)}"><div class="spread"><span><span class="pill ${r.k==='issue'?'acc':'bad'}">${REP_K[r.k]||'Issue'}</span> <b data-notr>${esc(r.n||r.u)}</b> <span class="muted small" data-notr>(${esc(r.u)})</span></span><span class="muted small">${fmtDate(r.at)}</span></div>
       ${repFull(r)}
@@ -4078,6 +4090,7 @@ const Admin=(()=>{
         const to=w==='adm'?{adm:1}:w.startsWith('sp:')?{sp:w.slice(3)}:w.startsWith('u:')?{u:w.slice(2)}:{};await gas('adm_note',{t,m,to,l:val('nt-l').trim()});toast('Notification sent.');await load(true);notesLoad();return}
       if(k==='admRepUse'){const r=(A.reps||[]).find(o=>o.id===d.k),el=$('#rr-'+d.k);if(r&&r.ai&&el){el.value=r.ai.reply;el.focus()}return}
       if(k==='admRepApply'){await gas('adm_rep',{id:d.k,apply:1,m:val('rr-'+d.k).trim()});toast('Applied. The question is corrected for everyone, and the user has been told.',6000);await load(true);if(S.on)pull(false);return}
+      if(k==='admRepUndo'){await gas('adm_rep',{id:d.k,undo:1});toast('Undone. The question has its old text again, and the report is open.',6000);await load(true);if(S.on)pull(true);return}
       if(k==='admRepRecheck'){await gas('adm_rep',{id:d.k,recheck:1});toast('Sent back to the checker.');await load(true);return}
       if(k==='admRepSend'||k==='admRepClose'||k==='admRepOpen'||k==='admRepDel'){const m=k==='admRepSend'?val('rr-'+d.k).trim():'';if(k==='admRepSend'&&!m)return toast('Type your reply first.');
         await gas('adm_rep',{id:d.k,m,open:k==='admRepOpen'?1:0,del:k==='admRepDel'?1:0});toast(k==='admRepSend'?'Reply sent.':k==='admRepDel'?'Deleted.':k==='admRepOpen'?'Opened again.':'Closed.');await load(true);return}
