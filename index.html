@@ -387,7 +387,7 @@ html.ar .langbtn{font-family:"Manrope",sans-serif}
 .fxrel .fxnav{justify-content:space-between}
 .fxhint{margin:4px 0}
 .mark.bulb{background:#0E1116;color:#F2B544}
-.mark.bulb svg{display:block}
+.mark.bulb svg{display:block}.mark.mvmark{background:transparent;overflow:hidden}
 /* v47: admin tab, activation, specialty chooser, bell */
 #gateov,#onbov,#emov{position:fixed;inset:0;z-index:68;background:var(--bg);overflow:auto;padding:24px 16px calc(24px + env(safe-area-inset-bottom,0px))}
 #onbov{z-index:66}.auth.onb{max-width:560px}
@@ -406,12 +406,13 @@ html.ar .langbtn{font-family:"Manrope",sans-serif}
 @media (max-width:420px){#appver{display:none}}
 @media (max-width:700px){body.role-adm .tab{font-size:.6rem;padding:10px 0}body.role-adm .tab.studytab{font-size:.74rem;flex:1.1}}
 body.role-user [data-a="delBook"],body.role-user [data-a="depBack"],body.role-user [data-a="editQ"],body.role-user [data-a="editTopics"],body.role-user [data-a="impInto"],body.role-user label:has(> #coverbulk),body.role-user [data-a="coverPick"]{display:none!important}
+.repchg{background:color-mix(in srgb,var(--ok,#2ea043) 18%,transparent);border-radius:6px;padding:1px 4px}.helpitem{padding:8px 0;border-bottom:1px solid var(--line)}.helpitem:last-child{border-bottom:0}
 </style>
 
 <header class="top">
   <div class="top-in">
     <div class="brandrow">
-      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb"><svg viewBox="0 0 512 512" width="24" height="24" aria-hidden="true"><g stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none"><path d="M256 28v30M362 73l-18 22M150 73l18 22M445 187l-28 6M67 187l28 6"/><path stroke-width="30" d="M256 92C176 92 126 152 126 218c0 48 28 78 52 106 16 20 22 38 22 58h112c0-20 6-38 22-58 24-28 52-58 52-106 0-66-50-126-130-126Z"/><path stroke-width="30" d="M212 412h88M228 446h56"/><path stroke-width="30" d="M222 196c0-22 14-36 36-36s36 14 36 34c0 30-36 30-36 62M258 300v2"/></g></svg></span>MCQ Vault<span class="appver" id="appver" title="App version on this device">v2.1</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
+      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span>MCQ Vault<span class="appver" id="appver" title="App version on this device">v3.0</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
       <div class="right"><button class="accbtn" id="accbtn" data-a="nav" data-v="settings" hidden></button><button class="sync" id="sync" data-a="nav" data-v="settings" title="Sync status"><span class="dot"></span><span id="synctxt">Starting…</span></button>
       <button class="themebtn bellbtn" id="bellbtn" data-ad="bell" aria-label="Notifications" title="Notifications" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.300 21a1.940 1.940 0 0 0 3.400 0"/></svg><span class="belln" hidden></span></button>
       <button class="themebtn langbtn" id="langbtn" data-a="lang" title="العربية" aria-label="التبديل إلى العربية" data-notr>ع</button>
@@ -2110,6 +2111,33 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Apply changes and send reply":"طبّق التعديلات وأرسل الرد",
+"Reply only, without changes":"رد فقط، بدون تعديلات",
+"See the edited question":"اعرض السؤال بعد التعديل",
+"The question now":"السؤال الآن",
+"Changed by the checker:":"ما عدّله المدقق:",
+"highlighted":"مظلّل",
+"Answer:":"الإجابة:",
+"Explanation:":"الشرح:",
+"Check now":"افحص الآن",
+"Check now needs the internet.":"الفحص الآن يحتاج إلى الإنترنت.",
+"Waiting for the checker. It reads the book twice a day (8:17 AM and 8:17 PM Baghdad time), or within an hour after Check now.":"بانتظار المدقق. يقرأ الكتاب مرتين يوميًا (8:17 صباحًا و8:17 مساءً بتوقيت بغداد)، أو خلال ساعة بعد الضغط على افحص الآن.",
+"Contact us":"تواصل معنا",
+"The admins have not added contact details yet.":"لم يضف المشرفون معلومات التواصل بعد.",
+"Admins change these in Admin, Settings, Help contacts.":"يغيّر المشرفون هذه المعلومات من الإدارة، الإعدادات، معلومات المساعدة.",
+"Send an email":"أرسل بريدًا",
+"Open in Telegram":"افتح في تيليجرام",
+"Call":"اتصل",
+"WhatsApp":"واتساب",
+"Save help contacts":"احفظ معلومات المساعدة",
+"Send to the Depository":"أرسل إلى المستودع",
+"Save and send the book to the Depository":"احفظ وأرسل الكتاب إلى المستودع",
+"not read 100%":"غير مقروء 100%",
+"Change target":"غيّر الهدف",
+"History":"السجل",
+"Help contacts (on everyone's Help tab). One per line: a name, a colon, then a phone number, email, link or @username.":"معلومات المساعدة (تظهر للجميع في تبويب المساعدة). سطر لكل جهة: الاسم، ثم نقطتان، ثم رقم هاتف أو بريد أو رابط أو اسم مستخدم يبدأ بـ @.",
+"Check requested. The checker starts within about an hour and reads the books and reports that are waiting.":"تم طلب الفحص. يبدأ المدقق خلال ساعة تقريبًا ويقرأ الكتب والبلاغات المنتظرة.",
+"Send it to the Depository: the checker reads its pages itself and adds the questions there.":"أرسله إلى المستودع: يقرأ المدقق صفحاته بنفسه ويضيف الأسئلة هناك.",
 "Approve: send this reply":"موافقة: إرسال هذا الرد",
 "Fixed by the checker":"صحّحه المدقق",
 "Undone":"تم التراجع",
@@ -3048,11 +3076,12 @@ function goalCard(){
         ${streak?`<span class="pill" title="Days in a row with the target reached">${nf(streak)}-day streak</span>`:''}</div>
       <p class="small">${msg}</p>
       <div class="gweek" aria-label="Last 7 days">${week.map(x=>gChip(x,x.k===t.k?'Today':wd(x.k),x.k===t.k?'today':'')).join('')}</div>
-      <details><summary>History and settings</summary>
+      <div class="row" style="gap:6px;margin-top:6px"><button class="btn sm" data-a="gEdit">${S.gEdit?'Cancel':'Change target'}</button></div>${S.gEdit?`<div class="row gedit" style="align-items:flex-end;margin-top:6px"><label class="field" style="width:140px"><span>MCQs per day</span><input type="number" id="gq-n" min="1" max="5000" value="${esc(g.n)}" inputmode="numeric"></label><button class="btn sm pri" data-a="gQuickSave">Save</button></div>`:''}
+      <details><summary>History</summary>
         <div class="glegend" style="margin-top:10px">${gChip({k:t.k,st:'done',n:0,g:0},'Done')}${gChip({k:t.k,st:'late',n:0,g:0},'Done late')}${gChip({k:t.k,st:'missed',n:0,g:0},'Missed')}</div>
         <p class="small muted" style="margin-top:8px">Since ${fmtDay(dayStart(days[0].k))}: ${nf(cnt('done'))} done, ${nf(cnt('late'))} done late, ${nf(past.filter(d=>d.st==='missed').length)} missed.</p>
         <div class="ghist">${hist.map(x=>gChip(x,`<span>${new Date(dayStart(x.k)).getDate()}</span><span style="font-weight:600">${x.st==='pre'?'':nf(x.n)}</span>`,x.k===t.k?'today':'')).join('')}</div>
-        <p class="small muted" style="margin-top:10px">Done late means a missed day made up later: answers beyond a later day's own target are added to it until it reaches its target. ${rem} Target and reminders are in <a href="#" data-a="nav" data-v="settings">Settings</a>.</p>
+        <p class="small muted" style="margin-top:10px">Done late means a missed day made up later: answers beyond a later day's own target are added to it until it reaches its target. ${rem} Reminders are in <a href="#" data-a="nav" data-v="settings">Settings</a>.</p>
       </details>
     </div></section>`}
 function goalPanel(){
@@ -3109,6 +3138,9 @@ function offlinePanel(){
     </details></div>`}
 async function saveOffline(neu){try{const r=await gas('api_offline',{page:$('#off-page')?$('#off-page').value.trim():undefined,api:$('#off-api')?$('#off-api').value.trim():undefined,newKey:!!neu});
   Cloud.info=Cloud.info||{};Cloud.info.offline=r;toast(neu?'New key made. Set up each device again with the new link.':'Saved.',5000)}catch(e){toast('Could not save: '+(e.message||e.code),7000)}render()}
+async function gQuickSave(){const g=goalNow(),ri=(Cloud.info||{}).rem,el=$('#gq-n'),n=Math.max(1,Math.min(5000,parseInt(el&&el.value,10)||g.n));S.gEdit=false;
+  try{const r=await writeGoal({n,by:'',rem:g.rem||[],mail:!!g.mail,em:!!g.em,email:(ri&&ri.email)||g.email||''});toast(r&&r.queued?`Saved. Daily target ${nf(n)}. It reaches your other devices when the connection is back.`:`Saved. Daily target ${nf(n)}.`,4000)}
+  catch(e){toast('Target saved, but the reminders could not be updated: '+(e.message||e.code),7000)}render()}
 async function saveGoal(){
   const n=Math.max(1,Math.min(5000,parseInt($('#g-n').value,10)||GOAL_DEF.n)),by='',mail=$('#g-mail').checked,em=$('#g-em').checked,email=$('#g-email')?$('#g-email').value.trim():'';
   const rem=[...new Set([$('#g-r1').value,$('#g-r2').value].filter(Boolean))].sort();
@@ -3342,7 +3374,7 @@ function adoptActive_(w,boot){
 }
 
 // every device shows its version; when the server has a newer one, say so and offer a reload
-const APP_VER=47;
+const APP_VER=48;
 async function verCheck(){if(Cloud.mode!=='gas'||!S.on)return;meLoad();try{const v=await gas('api_ver');if(v&&v.nt&&v.nt>(NOTES.nt||0))notesLoad();if(v&&v.ver>APP_VER){const el=$('#newver');el.innerHTML=`<span>A newer version (v${verName(v.ver)}) is available. This device has v${verName(APP_VER)}.</span><a href="${Cloud.via==='api'?'./':esc(v.url||'')}" target="${Cloud.via==='api'?'_self':'_top'}">Reload now</a>${v.apk&&/^https:[^\s"<>]+$/.test(v.apk)?` <a href="${esc(v.apk)}" target="_blank" rel="noopener">Download the new app</a>`:''}`;el.hidden=false}}catch(e){}}
 
 /*ACCOUNTS-START*/
@@ -3411,7 +3443,7 @@ function authPaint(msg){
     <div class="row"><button class="btn pri" data-u="go">Set new password and sign in</button><button class="btn" data-u="mailcode">Send another code</button></div>`
     :`<p class="muted small">A code goes to the email saved on your account.</p>${authField('au-u','Username','text',{ac:'username',v:vals.u})}
     <div class="row"><button class="btn pri" data-u="mailcode">Email me a code</button></div><p class="muted small">An older account with no email? <button class="linkbtn" data-u="mode" data-k="forgot">Use the recovery word</button></p>`;
-  ov.innerHTML=`<div class="auth"><div class="auth-brand"><span class="mark bulb"><svg viewBox="0 0 512 512" width="24" height="24" aria-hidden="true"><g stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none"><path d="M256 28v30M362 73l-18 22M150 73l18 22M445 187l-28 6M67 187l28 6"/><path stroke-width="30" d="M256 92C176 92 126 152 126 218c0 48 28 78 52 106 16 20 22 38 22 58h112c0-20 6-38 22-58 24-28 52-58 52-106 0-66-50-126-130-126Z"/><path stroke-width="30" d="M212 412h88M228 446h56"/><path stroke-width="30" d="M222 196c0-22 14-36 36-36s36 14 36 34c0 30-36 30-36 62M258 300v2"/></g></svg></span>MCQ Vault${window.MV_TEST||(st&&st.test)?' <span class="pill bad">TEST COPY</span>':''}<button type="button" class="themebtn langbtn" data-auth-lang data-notr style="margin-inline-start:10px">${I18N.lang==='ar'?'English':'العربية'}</button></div>
+  ov.innerHTML=`<div class="auth"><div class="auth-brand"><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span>MCQ Vault${window.MV_TEST||(st&&st.test)?' <span class="pill bad">TEST COPY</span>':''}<button type="button" class="themebtn langbtn" data-auth-lang data-notr style="margin-inline-start:10px">${I18N.lang==='ar'?'English':'العربية'}</button></div>
     <div class="panel auth-card"><h2>${m==='setup'?'Set up your account':m==='up'?'Create an account':m==='forgot'||m==='mail'?'New password':'Sign in'}</h2>${tabs}
     ${AUTH.err&&st?`<div class="notice bad">${esc(AUTH.err)}</div>`:''}${AUTH.ok?`<div class="notice info">${esc(AUTH.ok)}</div>`:''}${body}</div></div>`;
   ov.querySelectorAll('button').forEach(b=>b.disabled=AUTH.busy&&!!b.dataset.u&&b.dataset.u!=='mode');
@@ -3455,7 +3487,7 @@ async function testSeed(){if(!window.MV_TEST||!ACC||!ACC.own)return;
     if(st&&st.done){try{localStorage.setItem('mv-seeded-test','1')}catch(e){}break}}
   const ov=$('#authov');if(ov)ov.remove()}
 function authPaintMsg(t){let ov=$('#authov');if(!ov){ov=document.createElement('div');ov.id='authov';document.body.appendChild(ov)}
-  ov.innerHTML=`<div class="auth"><div class="auth-brand"><span class="mark bulb"><svg viewBox="0 0 512 512" width="24" height="24" aria-hidden="true"><g stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none"><path d="M256 28v30M362 73l-18 22M150 73l18 22M445 187l-28 6M67 187l28 6"/><path stroke-width="30" d="M256 92C176 92 126 152 126 218c0 48 28 78 52 106 16 20 22 38 22 58h112c0-20 6-38 22-58 24-28 52-58 52-106 0-66-50-126-130-126Z"/><path stroke-width="30" d="M212 412h88M228 446h56"/><path stroke-width="30" d="M222 196c0-22 14-36 36-36s36 14 36 34c0 30-36 30-36 62M258 300v2"/></g></svg></span>MCQ Vault <span class="pill bad">TEST COPY</span></div><div class="panel auth-card"><p>${esc(t)}</p></div></div>`}
+  ov.innerHTML=`<div class="auth"><div class="auth-brand"><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span>MCQ Vault <span class="pill bad">TEST COPY</span></div><div class="panel auth-card"><p>${esc(t)}</p></div></div>`}
 /* ----- Settings › Account ----- */
 function accountPanel(){
   if(!ACC)return'';
@@ -3653,7 +3685,7 @@ function meApply(){document.body.classList.toggle('role-user',!isAdm()||stuView(
   try{renderTabs()}catch(e){}bellPaint();if(!gateCheck()&&!emReqCheck()){onbCheck();let ask=false;try{ask=sessionStorage.getItem('mv-askview')==='1';if(ask&&ME&&!isAdm())sessionStorage.removeItem('mv-askview')}catch(e){}if(ask&&isAdm()&&ACC&&ME&&!$('#onbov')&&!$('#authov')){try{sessionStorage.removeItem('mv-askview')}catch(e){}viewPick()}}}
 function meBoot(){ME=meCached();statsBoot();if(!ME&&ACC)ME={u:ACC.u,n:ACC.n,own:!!ACC.own,adm:!!(ACC.own||ACC.adm),sp:ACC.sp||'',ex:ACC.ex||'',act:0,lock:'',trial:null,contact:''};
   document.body.classList.toggle('role-user',!isAdm());document.body.classList.toggle('role-adm',isAdm())}
-const BRAND=()=>`<div class="auth-brand"><span class="mark bulb"><svg viewBox="0 0 512 512" width="24" height="24" aria-hidden="true"><g stroke="currentColor" stroke-width="26" stroke-linecap="round" fill="none"><path d="M256 28v30M362 73l-18 22M150 73l18 22M445 187l-28 6M67 187l28 6"/><path stroke-width="30" d="M256 92C176 92 126 152 126 218c0 48 28 78 52 106 16 20 22 38 22 58h112c0-20 6-38 22-58 24-28 52-58 52-106 0-66-50-126-130-126Z"/><path stroke-width="30" d="M212 412h88M228 446h56"/><path stroke-width="30" d="M222 196c0-22 14-36 36-36s36 14 36 34c0 30-36 30-36 62M258 300v2"/></g></svg></span>MCQ Vault<button type="button" class="themebtn langbtn" data-auth-lang data-notr style="margin-inline-start:10px">${I18N.lang==='ar'?'English':'العربية'}</button></div>`;
+const BRAND=()=>`<div class="auth-brand"><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span>MCQ Vault<button type="button" class="themebtn langbtn" data-auth-lang data-notr style="margin-inline-start:10px">${I18N.lang==='ar'?'English':'العربية'}</button></div>`;
 
 /* ----- offline limit: the app must reach the server every few days, so a device that was signed out or moved cannot keep working offline ----- */
 const leaseKey=()=>'mv-lease-'+(ACC?ACC.u:'');
@@ -3698,7 +3730,7 @@ document.addEventListener('visibilitychange',()=>{try{if(document.visibilityStat
 /* ----- free questions, then the activation code ----- */
 function trialUsed(){if(!ME||!ME.trial)return 0;return Math.max(ME.trial.used||0,(M.att?M.att.length:0)+(M.exAtt?M.exAtt.length:0))}
 function gateNeed(){if(isAdm()||!ME||!ME.trial||!ME.trial.on)return'';if(leaseBad())return'offline';if(ME.lock)return ME.lock;if(ME.act)return ME.sub&&ME.sub<Date.now()?'sub':'';return trialUsed()>=ME.trial.n?'trial':''}
-const verName=n=>n>=47?'2.'+(n-46):''+n;
+const verName=n=>n>=48?'3.'+(n-48):n>=47?'2.'+(n-46):''+n;
 const GATE={busy:false,err:''};
 function gateCheck(){const k=gateNeed(),ov=$('#gateov');
   if(!k){if(ov)ov.remove();return false}
@@ -3923,7 +3955,16 @@ const Admin=(()=>{
     return`<details class="repq"><summary><b data-notr>${esc(q.bookName)}${q.num?' · Q'+esc(q.num):''}${q.p?' · p.'+esc(q.p):''}</b> <span class="muted">Answer in the app:</span> <b data-notr>${esc(q.a||'—')}</b></summary>
       ${q.v?`<p class="small muted" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.v)}</p>`:''}<p data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.s)}</p><ol type="A" class="small" data-notr>${(q.o||[]).map((o,i)=>`<li${(q.a||'').includes('ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i])?' style="font-weight:700"':''}>${esc(o)}</li>`).join('')}</ol>
       ${q.e?`<p class="small"><span class="muted">Explanation in the app:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.e)}</span></p>`:`<p class="small muted">No explanation in the app.</p>`}</details>`}
-  function repAi(r){const ai=r.ai;if(r.st==='done'&&!ai)return'';if(!ai)return`<p class="small muted" style="margin:6px 0 0">Waiting for the checker. It runs every hour and reads the book.</p>`;const v=AIV[ai.verdict]||AIV.unsure;
+  /* the question as it is now in the library, after the checker's edits (23 Nov 2026) */
+  function repView(id){const r=(A.reps||[]).find(x=>x.id===id),q=r&&r.fq;if(!q||!q.s)return toast('The question could not be loaded. Reload the reports and try again.');
+    const w=(r.applied&&r.applied.what)||[],hl=k=>w.includes(k)?' class="repchg"':'',L='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    modal(`<h3>The question now</h3><p class="small muted"><span data-notr>${esc(q.bookName||'')}${q.num?' · Q'+esc(q.num):''}${q.p?' · p.'+esc(q.p):''}</span>${w.length?' · <span>Changed by the checker:</span> <span class="repchg">highlighted</span>':''}</p>
+      ${q.v?`<p${hl('v')} data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.v)}</p>`:''}<p${hl('s')} data-notr style="white-space:pre-wrap;overflow-wrap:anywhere;font-weight:600">${esc(q.s)}</p>
+      <ol type="A"${hl('o')} data-notr>${(q.o||[]).map((o,i)=>`<li${(q.a||'').includes(L[i])?` style="font-weight:700"`:''}>${esc(o)}</li>`).join('')}</ol>
+      <p><span class="muted">Answer:</span> <b${hl('a')} data-notr>${esc(q.a||'—')}</b></p>
+      ${q.e?`<p class="small"><span class="muted">Explanation:</span><br><span${hl('e')} data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.e)}</span></p>`:''}
+      <div class="row" style="justify-content:flex-end"><button class="btn pri" data-a="closeModal">Close</button></div>`)}
+  function repAi(r){const ai=r.ai;if(r.st==='done'&&!ai)return'';if(!ai)return`<p class="small muted" style="margin:6px 0 0">Waiting for the checker. It reads the book twice a day (8:17 AM and 8:17 PM Baghdad time), or within an hour after Check now.</p>`;const v=AIV[ai.verdict]||AIV.unsure;
     return`<div class="notice info repai" style="margin-top:6px"><b>The checker recommends</b> <span class="pill ${v[0]}">${v[1]}</span>${r.applied?` <span class="pill ok">${r.applied.by==='checker'?'Fixed by the checker':'Applied'}</span>`:''}${r.undone?` <span class="pill warn">Undone</span>`:''}
       ${ai.why?`<br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.why)}</span>`:''}
       ${ai.err?`<br><span class="small" style="color:var(--bad,#c33)">Could not apply it by itself: <span data-notr>${esc(ai.err)}</span></span>`:''}
@@ -3934,7 +3975,7 @@ const Admin=(()=>{
       ${ai.e?`<br><span>New explanation:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.e)}</span>`:''}
       ${ai.src?`<br><span class="muted small">Source in the book:</span> <span class="small" data-notr>${esc(ai.src)}</span>`:''}
       ${ai.reply?`<br><span class="muted small">Suggested reply:</span> <span class="small" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.reply)}</span>`:''}
-      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Approve and apply</button>`:''}${ai.verdict!=='fix'&&ai.reply?`<button class="btn sm pri" data-ad="admRepOk" data-k="${esc(r.id)}">Approve: send this reply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
+      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Apply changes and send reply</button>`:''}${ai.verdict!=='fix'&&ai.reply?`<button class="btn sm pri" data-ad="admRepOk" data-k="${esc(r.id)}">Approve: send this reply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm pri" data-ad="admRepView" data-k="${esc(r.id)}">See the edited question</button><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
   function vRep(){const L=A.reps||[],op=L.filter(r=>r.st!=='done'),dn=L.filter(r=>r.st==='done').slice(0,40);
     const card=r=>`<div class="nitem" data-rep="${esc(r.id)}"><div class="spread"><span><span class="pill ${r.k==='issue'?'acc':'bad'}">${REP_K[r.k]||'Issue'}</span> <b data-notr>${esc(r.n||r.u)}</b> <span class="muted small" data-notr>(${esc(r.u)})</span></span><span class="muted small">${fmtDate(r.at)}</span></div>
       ${repFull(r)}
@@ -3942,9 +3983,9 @@ const Admin=(()=>{
       ${r.re?`<div class="notice info" style="margin-top:6px"><b>Reply</b> <span class="muted small" data-notr>${esc(r.re.by||'')} · ${fmtDate(r.re.at)}</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(r.re.m)}</span></div>`:''}
       ${repAi(r)}
       ${r.st!=='done'?`<label class="field" style="margin-top:6px"><span>Your reply</span><textarea id="rr-${esc(r.id)}" rows="2" maxlength="1500"></textarea></label>
-        <div class="row">${r.q&&M.Q.has(r.q.id)?`<button class="btn sm" data-a="editQ" data-id="${esc(r.q.id)}">Edit question</button>`:''}<button class="btn sm pri" data-ad="admRepSend" data-k="${esc(r.id)}">Send reply and close</button><button class="btn sm" data-ad="admRepClose" data-k="${esc(r.id)}">Close without a reply</button><button class="linkbtn" data-ad="admRepDel" data-k="${esc(r.id)}">Delete</button></div>`
+        <div class="row">${r.q&&M.Q.has(r.q.id)?`<button class="btn sm" data-a="editQ" data-id="${esc(r.q.id)}">Edit question</button>`:''}<button class="btn sm pri" data-ad="admRepSend" data-k="${esc(r.id)}">${r.ai&&r.ai.verdict==='fix'&&r.q?'Reply only, without changes':'Send reply and close'}</button><button class="btn sm" data-ad="admRepClose" data-k="${esc(r.id)}">Close without a reply</button><button class="linkbtn" data-ad="admRepDel" data-k="${esc(r.id)}">Delete</button></div>`
       :`<div class="row" style="margin-top:6px"><button class="linkbtn" data-ad="admRepOpen" data-k="${esc(r.id)}">Open again</button><button class="linkbtn" data-ad="admRepDel" data-k="${esc(r.id)}">Delete</button></div>`}</div>`;
-    return`<div class="panel"><h3>Waiting for a reply</h3><p class="small" style="max-width:76ch">Users send these from the Report button on a question and from Report an issue. They are told they will have a reply within 24 hours. Your reply shows under their bell. Every report is first read by the checker, which looks in the book and recommends a fix. Nothing changes until you approve it, and you can always fix the question by hand with Edit question.</p>
+    return`<div class="panel"><div class="spread"><h3>Waiting for a reply</h3>${checkNowBtn()}</div><p class="small" style="max-width:76ch">Users send these from the Report button on a question and from Report an issue. They are told they will have a reply within 24 hours. Your reply shows under their bell. Every report is first read by the checker, which looks in the book and recommends a fix. Nothing changes until you approve it, and you can always fix the question by hand with Edit question.</p>
       ${op.length?`<div class="nlist" style="max-height:none">${op.map(card).join('')}</div>`:`<p class="muted small">No reports are waiting.</p>`}</div>
     <div class="panel"><h3>Closed</h3>${dn.length?`<div class="nlist">${dn.map(card).join('')}</div>`:`<p class="muted small">Nothing closed yet.</p>`}</div>`}
   function vOver(){const L=users().filter(a=>!a.del),U=L.filter(a=>a.role==='user'),wk=now()-7*DAY;
@@ -4044,7 +4085,9 @@ const Admin=(()=>{
       <p class="muted small" style="max-width:76ch">When this is on, the browser version (computer and iPhone) locks after 30 minutes without the server.</p>
       <p class="muted small" style="max-width:76ch">The app also locks when this many questions were answered without internet, or when the date of the device is turned back. It opens again as soon as it reaches the server.</p>
       <label class="field"><span>How people get a code (shown on the activation screen)</span><textarea id="cfg-contact" rows="3" maxlength="400" placeholder="e.g. Message us on Telegram @... with your username">${esc(c.contact)}</textarea></label>
-      <div class="row"><button class="btn" data-ad="admCfgContact">Save text</button></div></div>
+      <div class="row"><button class="btn" data-ad="admCfgContact">Save text</button></div>
+      <label class="field" id="cfg-helpbox" style="margin-top:8px"><span>Help contacts (on everyone's Help tab). One per line: a name, a colon, then a phone number, email, link or @username.</span><textarea id="cfg-help" rows="5" maxlength="2000" placeholder="WhatsApp: +964 770 000 0000&#10;Email: support@example.com&#10;Telegram: @mcqvault">${esc(c.help||'')}</textarea></label>
+      <div class="row"><button class="btn" data-ad="admCfgHelp">Save help contacts</button></div></div>
     <div class="panel" id="cfg-prices"><h3>Prices and payment</h3>
       <p class="small" style="max-width:76ch">Users see this on their Prices tab. Payment happens outside the app. After someone pays, open their account in Accounts and add the plan or the days.</p>
       <div id="cfg-plans">${(c.plans||[]).map((o,i)=>`<div class="row planrow" data-id="${esc(o.id||'')}" style="align-items:flex-end"><label class="field" style="flex:2;min-width:120px"><span>Plan name</span><input type="text" class="pl-n" maxlength="40" value="${esc(o.n)}" data-notr></label><label class="field" style="flex:2;min-width:110px"><span>Price</span><input type="text" class="pl-p" maxlength="60" value="${esc(o.p)}" data-notr></label><label class="field" style="flex:1;min-width:80px"><span>Days</span><input type="number" class="pl-d" min="1" max="3650" value="${o.d}" inputmode="numeric"></label><button class="btn sm danger" data-ad="admPlanDel" data-k="${i}">Remove</button></div>`).join('')}</div>
@@ -4090,7 +4133,8 @@ const Admin=(()=>{
       if(k==='admNoteSend'){const t=val('nt-t').trim(),m=val('nt-m').trim(),w=val('nt-to');if(!t&&!m)return toast('Type a title or a message.');
         const to=w==='adm'?{adm:1}:w.startsWith('sp:')?{sp:w.slice(3)}:w.startsWith('u:')?{u:w.slice(2)}:{};await gas('adm_note',{t,m,to,l:val('nt-l').trim()});toast('Notification sent.');await load(true);notesLoad();return}
       if(k==='admRepUse'){const r=(A.reps||[]).find(o=>o.id===d.k),el=$('#rr-'+d.k);if(r&&r.ai&&el){el.value=r.ai.reply;el.focus()}return}
-      if(k==='admRepApply'){await gas('adm_rep',{id:d.k,apply:1,m:val('rr-'+d.k).trim()});toast('Applied. The question is corrected for everyone, and the user has been told.',6000);await load(true);if(S.on)pull(false);return}
+      if(k==='admRepApply'){const r0=(A.reps||[]).find(x=>x.id===d.k);const m=val('rr-'+d.k).trim()||(r0&&r0.ai&&r0.ai.reply)||'';await gas('adm_rep',{id:d.k,apply:1,m});toast('Applied. The question is corrected for everyone, and the user has the reply.',6000);await load(true);if(S.on)pull(false);repView(d.k);return}
+      if(k==='admRepView'){repView(d.k);return}
       if(k==='admRepOk'){const r=(A.reps||[]).find(x=>x.id===d.k);if(!r||!r.ai||!r.ai.reply)return;await gas('adm_rep',{id:d.k,m:r.ai.reply});toast('Reply sent.');await load(true);return}
       if(k==='admRepUndo'){await gas('adm_rep',{id:d.k,undo:1});toast('Undone. The question has its old text again, and the report is open.',6000);await load(true);if(S.on)pull(true);return}
       if(k==='admRepRecheck'){await gas('adm_rep',{id:d.k,recheck:1});toast('Sent back to the checker.');await load(true);return}
@@ -4114,6 +4158,7 @@ const Admin=(()=>{
       if(k==='admStats'){toast('Counting…');const s=await gas('adm_stats',{});A.data=null;await load(true);statsLoad(true);toast(s.more?'Counted part of the accounts. Press again for the rest.':'Counted.');return}
       if(k==='admCfgOffq')return cfg({offq:val('cfg-offq')},'Saved.');
       if(k==='admCfgContact')return cfg({contact:val('cfg-contact')},'Saved.');
+      if(k==='admCfgHelp'){const h=val('cfg-help');if(ME)ME.help=h.trim();return cfg({help:h},'Saved. Everyone sees them on the Help tab.')}
     }catch(e){toast(e.code==='signed_out'?'You are signed out. Sign in again.':'Could not do that: '+cleanErr(e),6000)}}
   async function change(t){const k=t.dataset.adc;
     try{
@@ -4158,6 +4203,22 @@ async function repSend(id){if(!S.on)return toast('Reports need an internet conne
   try{try{await gas('rep_add',x)}catch(e){if(x.k==='q'&&/bad report/.test(String(e&&e.message||e))){x.k='ans';await gas('rep_add',x)}else throw e} // a server from before 19 Nov knows no 'q'
     toast('Report sent. You will have a reply within 24 hours.',6000)}
   catch(e){toast('Could not send: '+cleanErr(e),8000);if(id){REP.draft={id,d:dd[0],m:m0};repQ(id)}else{repIssue();const t=$('#rep-m');if(t)t.value=m0}}}
+/* check now (23 Nov 2026): the checker reads the books and reports twice a day; admins can ask for a check within the hour */
+function checkNowBtn(){return isAdm()&&Cloud.mode==='gas'?`<button class="btn sm" data-a="checkNow" title="The checker runs twice a day. Use this when many books or reports are waiting.">Check now</button>`:''}
+async function checkNow(){if(!S.on||navigator.onLine===false)return toast('Check now needs the internet.');
+  try{const r=await gas('adm_checkNow',{});toast(r&&r.again?'A check was already requested a few minutes ago. It starts within about an hour.':'Check requested. The checker starts within about an hour and reads the books and reports that are waiting.',7000)}catch(e){toast('Could not ask for a check: '+(e.message||e.code),7000)}}
+/* Help tab (23 Nov 2026): contact details the admins type in Admin, Settings, one per line "Name: value" */
+function helpItems(){return String((ME&&ME.help)||'').split(/\n+/).map(l=>l.trim()).filter(Boolean).map(l=>{const i=l.indexOf(':');return i>0&&i<40?{l:l.slice(0,i).trim(),v:l.slice(i+1).trim()}:{l:'',v:l}})}
+function helpLinks(it){const v=it.v,dg=v.replace(/[^\d]/g,'');
+  if(/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))return`<a class="btn sm" href="mailto:${esc(v)}">Send an email</a>`;
+  if(/^https:\x2f\x2f\S+$/.test(v))return`<a class="btn sm" href="${esc(v)}" target="_blank" rel="noopener">Open</a>`;
+  if(/^@[A-Za-z0-9_]{3,40}$/.test(v)&&/telegram/i.test(it.l))return`<a class="btn sm" href="https:\x2f\x2ft.me/${esc(v.slice(1))}" target="_blank" rel="noopener">Open in Telegram</a>`;
+  if(/^[\d\s+()\-]{7,24}$/.test(v)&&dg.length>=7)return`<a class="btn sm" href="tel:${esc(v.replace(/[^\d+]/g,''))}">Call</a><a class="btn sm" href="https:\x2f\x2fwa.me/${esc(dg)}" target="_blank" rel="noopener">WhatsApp</a>`;
+  return''}
+function viewHelp(){const L=helpItems();
+  return`<h1>Help</h1><div class="panel"><h3>Contact us</h3>${L.length?`<div class="stack helplist">${L.map(it=>`<div class="spread helpitem"><span>${it.l?`<b data-notr>${esc(it.l)}</b><br>`:''}<span data-notr style="overflow-wrap:anywhere">${esc(it.v)}</span></span><span class="row" style="gap:6px">${helpLinks(it)}</span></div>`).join('')}</div>`
+    :`<p class="muted small">The admins have not added contact details yet.</p>`}
+    ${isAdm()?`<p class="small muted" style="margin-top:8px">Admins change these in Admin, Settings, Help contacts.</p><div class="row"><button class="btn sm" data-a="nav" data-v="admin">Open Admin</button></div>`:''}</div>${helpPanel()}`}
 function helpPanel(){if(!ACC)return'';return`<div class="panel" id="helppanel"><h3>Help</h3><p class="small">Something not working, or a question about your account? Send it to the admins. You will have a reply within 24 hours.</p><div class="row"><button class="btn" data-ad="repIssue">Report an issue</button></div></div>`}
 document.addEventListener('click',e=>{const el=e.target.closest('[data-ad]');if(!el||el.disabled)return;const k=el.dataset.ad,d=el.dataset;
   if(el.tagName==='INPUT'&&el.type==='radio'){Admin.act(k,d,el);return}
@@ -4476,9 +4537,9 @@ async function reconcile(){
 function guessDevice(){const u=navigator.userAgent;return /iPhone/.test(u)?'iPhone':/iPad/.test(u)?'iPad':/Android/.test(u)?'Android':/Mac/.test(u)?'Mac':/Windows/.test(u)?'Windows PC':'This device'}
 
 /* ================= rendering shell ================= */
-const TABS=[['study','Study'],['bank','Wrong bank'],['stats','Statistics'],['library','Library'],['depository','Depository'],['focus','Deep Focus'],['import','Import'],['admin','Admin'],['prices','Subscription'],['settings','Settings']];
+const TABS=[['study','Study'],['bank','Wrong bank'],['stats','Statistics'],['library','Library'],['depository','Depository'],['focus','Deep Focus'],['import','Import'],['admin','Admin'],['prices','Subscription'],['help','Help'],['settings','Settings']];
 const ICON_PLAY='<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.5-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg>';
-const TAB_SHORT={study:'Study',bank:'Bank',stats:'Stats',library:'Library',depository:'Depot',focus:'Focus',import:'Import',admin:'Admin',prices:'My plan',settings:'Settings'};
+const TAB_SHORT={study:'Study',bank:'Bank',stats:'Stats',library:'Library',depository:'Depot',focus:'Focus',import:'Import',admin:'Admin',prices:'My plan',help:'Help',settings:'Settings'};
 function renderTabs(){
   const due=[...M.qs.values()].filter(s=>s.bank&&s.due<=now()).length,depN=depBooks().filter(depReady).length;
   $('#tabs').innerHTML=TABS.filter(([v])=>isAdm()&&!stuView()?true:v!=='depository'&&v!=='admin').map(([v,l])=>`<button class="tab${v==='study'?' studytab':''}" data-a="nav" data-v="${v}" ${S.view===v||(S.view==='quiz'||S.view==='summary')&&v==='study'?'aria-current="page"':''}>${v==='study'?ICON_PLAY:''}<span class="tl">${!isAdm()&&v==='import'?'Request a book':l}</span><span class="ts">${!isAdm()&&v==='import'?'Request':TAB_SHORT[v]}</span>${v==='bank'&&due?`<span class="pill bad">${nf(due)}</span>`:''}${v==='depository'&&depN?`<span class="pill ok" title="Ready to add">${nf(depN)}</span>`:''}${v==='admin'&&(reqWaiting().length+repN())?`<span class="pill warn" title="Book requests and reports">${nf(reqWaiting().length+repN())}</span>`:''}</button>`).join('');
@@ -4489,7 +4550,7 @@ function render(){
   if(!isAdm()&&(S.view==='depository'||S.view==='admin'))S.view='study';gateCheck();bellPaint();try{streakPaint()}catch(e){}Promise.resolve().then(()=>{try{tipPaint()}catch(e){}});
   const y0=scrollY;renderTabs();const m=$('#main');
   const v=S.view;document.body.classList.toggle('inquiz',v==='quiz');quizClock();
-  const html=(v==='quiz'?'':undoBanner())+(v==='quiz'?viewQuiz():v==='summary'?viewSummary():v==='bank'?viewBank():v==='stats'?viewStats():v==='library'?viewLibrary():v==='depository'?viewDepository():v==='focus'?Focus.view():v==='import'?viewImport():v==='admin'?Admin.view():v==='prices'?viewPrices():v==='settings'?viewSettings():(trialBanner()+subBanner()+viewStudy()));
+  const html=(v==='quiz'?'':undoBanner())+(v==='quiz'?viewQuiz():v==='summary'?viewSummary():v==='bank'?viewBank():v==='stats'?viewStats():v==='library'?viewLibrary():v==='depository'?viewDepository():v==='focus'?Focus.view():v==='import'?viewImport():v==='admin'?Admin.view():v==='prices'?viewPrices():v==='help'?viewHelp():v==='settings'?viewSettings():(trialBanner()+subBanner()+viewStudy()));
   if(!(render.soft&&render.last===html&&render.lastV===v&&m.childElementCount))m.innerHTML=html;render.last=html;render.lastV=v;
   if(v==='study')applyStyle();
   if(v==='quiz')startTicker();else stopTicker();
@@ -5171,7 +5232,7 @@ function viewLibrary(){
   ${(()=>{const L=isAdm()&&!stuView()?[...M.books.values()].filter(b=>!b.cover):[];return L.length?`<div class="notice info undo-bar"><span>${L.length} book${L.length>1?'s have':' has'} no picture yet (imported before pictures came in). Choose ${L.length>1?'their PDFs, all at once if you like':'its PDF'}: each book gets page 1 of its own PDF.</span><label class="btn sm">Choose PDFs<input type="file" id="coverbulk" accept="application/pdf,.pdf" multiple hidden></label></div>`:''})()}
   <div class="tbl-wrap"><table><thead><tr><th>Book</th><th>File type</th><th class="n">Questions</th><th class="n">Chapters</th><th class="n">Seen</th><th class="n">Accuracy</th><th>Imported</th></tr></thead><tbody>
   ${libBooks().sort((a,b)=>a.name.localeCompare(b.name)).map(b=>{const ids=M.bookQ.get(b.id)||[];let n=0,c=0,seen=0;for(const id of ids){const s=M.qs.get(id);if(s){seen++;n+=s.n;c+=s.c}}
-    return`<tr class="click" data-a="openBook" data-id="${b.id}"><td class="bkname"><div class="bkcell">${bookThumb(b)}<div><b>${esc(b.name)}</b> ${bookVerified(b)?VBADGE:''}${(b.chunks||[]).some(c=>!M.chunks.has(c.id))?' <span class="pill warn">downloading</span>':''}</div></div></td><td>${b.source?.kind?`<span class="pill ${(KIND[b.source.kind.k]||KIND.mixed).cls}">${(KIND[b.source.kind.k]||KIND.mixed).l}</span>`:'<span class="small muted">not recorded</span>'}</td><td class="n">${nf(ids.length)}</td><td class="n">${(b.topics||[]).length}</td><td class="n">${nf(seen)}</td><td class="n">${fmtPct(c,n)}</td><td>${fmtDay(b.createdAt)}</td></tr>`}).join('')}</tbody></table></div>${availHTML()}`;
+    return`<tr class="click" data-a="openBook" data-id="${b.id}"><td class="bkname"><div class="bkcell">${bookThumb(b)}<div><b>${esc(b.name)}</b> ${bookVerified(b)?VBADGE:''}${(b.chunks||[]).some(c=>!M.chunks.has(c.id))?' <span class="pill warn">downloading</span>':''}${bookVerified(b)?'':` <span class="pill warn">not read 100%</span> <button class="btn sm" data-a="depBack" data-id="${b.id}">Send to Depository</button>`}</div></div></td><td>${b.source?.kind?`<span class="pill ${(KIND[b.source.kind.k]||KIND.mixed).cls}">${(KIND[b.source.kind.k]||KIND.mixed).l}</span>`:'<span class="small muted">not recorded</span>'}</td><td class="n">${nf(ids.length)}</td><td class="n">${(b.topics||[]).length}</td><td class="n">${nf(seen)}</td><td class="n">${fmtPct(c,n)}</td><td>${fmtDay(b.createdAt)}</td></tr>`}).join('')}</tbody></table></div>${availHTML()}`;
 }
 /* book details are for admins (18 Nov 2026): users see the list of books only, nothing to open */
 function libFull(){return isAdm()&&!stuView()}
@@ -6458,7 +6519,7 @@ function impReview(){
   const per=20,pg=I.revPage||0,show=(I.revFilter==='issues'?issues:qs.map((q,i)=>[q,i]));const pages=Math.ceil(show.length/per);
   return`<div class="stack" style="gap:4px"><h1>Check the extraction</h1><p class="muted">${esc(I.fileName)} · ${U} ${I.from}–${I.to} of ${nf(I.total)}${I.method==='ai'?' · Claude-assisted':''}</p></div>
   ${kindBar(I.kind)}
-  ${qs.length?'':`<div class="notice bad">No questions were found. ${I.chars<200*I.pages.length?'This file seems to have little or no selectable text (a scanned book needs OCR first). ':''}Try the Claude-assisted reader, or adjust the heading pattern.</div>`}
+  ${qs.length?'':`<div class="notice bad">No questions were found. ${I.chars<200*I.pages.length?'This file seems to have little or no selectable text (a scanned book needs OCR first). ':''}${isAdm()?'Send it to the Depository: the checker reads its pages itself and adds the questions there.':'Try the Claude-assisted reader, or adjust the heading pattern.'}</div>`}
   ${layoutPanel(I)}
   <div class="panel"><div class="spread"><h3>What this import covers</h3><span class="small muted">Preview before saving</span></div>${coveragePanel(impCoverage(I),I.from,I.unit,{clickable:true})}${copyIssuesBox(I)}</div>
   <div class="panel"><h3>Questions</h3>${qSummaryTable({...c,saved:c.kept})}${missedPanel(I)}
@@ -6467,7 +6528,7 @@ function impReview(){
       ${c.unv||I.inclUnver?`<label class="chk"><input type="checkbox" id="imp-unv" ${I.inclUnver?'checked':''} data-a="impOpt"> Keep questions Claude returned that could not be matched word-for-word to the page</label>`:''}
     </div>
     <details><summary class="small">Chapters (${R.topics.length})</summary><p class="small muted" style="margin-top:6px">${R.topics.map(esc).join(' · ')}</p></details>
-    <div class="row" style="justify-content:flex-end"><button class="btn" data-a="impBack">Cancel this import</button><button class="btn pri" data-a="impSave" ${c.kept?'':'disabled'}>Save ${nf(c.kept)} questions</button></div></div>
+    <div class="row" style="justify-content:flex-end"><button class="btn" data-a="impBack">Cancel this import</button>${impDepBtn(I,c)}${c.kept?`<button class="btn pri" data-a="impSave">Save ${nf(c.kept)} questions</button>`:''}</div></div>
   <div class="spread"><div class="seg"><label><input type="radio" name="revf" value="all" data-a="revf" ${I.revFilter!=='issues'?'checked':''}><span>All</span></label><label><input type="radio" name="revf" value="issues" data-a="revf" ${I.revFilter==='issues'?'checked':''}><span>With issues (${nf(issues.length)})</span></label></div>${pager(Math.min(pg,Math.max(0,pages-1)),pages,'revPage')}</div>
   <div class="stack">${show.slice(pg*per,pg*per+per).map(([q,i])=>`<div class="qcard"><div class="spread"><div class="qmeta"><span class="num">Q${q.num}</span><span>${esc(q.topic)}</span><span class="num">p.${q.p}</span>${q.issues.map(x=>`<span class="pill bad">${esc(x)}</span>`).join('')}${q.unverified?'<span class="pill bad">not verbatim</span>':''}</div>
     <label class="chk small"><input type="checkbox" data-a="impEx" data-i="${i}" ${I.excluded.has(i)?'':'checked'}> include</label></div>
@@ -6609,6 +6670,12 @@ function bindAI(qs,ans){let matched=0;
 }
 
 /* ---- save: plan blocks, upload, read back, record coverage ---- */
+/* a book the reader did not read 100% (even 0 questions) can go to the Depository, where the checker reads its pages (23 Nov 2026) */
+function impFull(I){const m=impCoverage(I),t=Array.isArray(m)?m.join(''):String(m||'');return /[SA]/.test(t)&&!/[PXUFE]/.test(t)}
+function impDepBtn(I,c){if(!isAdm())return'';const b=I.bookId&&M.books.get(I.bookId);const toLib=b&&!b.dep;
+  if(!c.kept)return`<button class="btn pri" data-a="impDep">Send to the Depository</button>`;
+  return toLib&&!impFull(I)?`<button class="btn" data-a="impDep">Save and send the book to the Depository</button>`:''}
+async function impDep(){const I=S.imp;if(!I)return;I.toDep=1;await impSave()}
 function impPlan(){
   const I=S.imp,qs=I.result.questions,kept=[...impKeptIdx(I)];
   let b;if(I.bookId&&M.books.has(I.bookId))b=clone(M.books.get(I.bookId));
@@ -6666,7 +6733,7 @@ async function impFinish(){const I=S.imp,P=I.plan;
     if(K){for(const x in K)if(K[x]===undefined)delete K[x];b.source={...(b.source||{}),file:I.fileName,kind:K}}
     const rep={id:I.reportId,at:now(),file:I.fileName,method:I.method,unit:I.unit,kind:K,from:I.from,to:I.to,total:I.total,map:rle(impCoverage(I)),
       found:c.found,saved:c.saved,failed:c.failed,noAns:c.noAns,dup:c.dup,unt:c.unt,unv:c.unv,unmatched:c.unmatched,missed:c.missed||0,rv:READER_VER,blocks:P.blocks.length,blocksOk:P.blocks.filter(x=>x.st==='ok').length,lost:lostList(I)};
-    b.imports=(b.imports||[]).filter(r=>r.id!==rep.id);b.imports.push(rep);if(b.dep)b.dep={...b.dep,rv:READER_VER};
+    b.imports=(b.imports||[]).filter(r=>r.id!==rep.id);b.imports.push(rep);if(b.dep)b.dep={...b.dep,rv:READER_VER};if(I.toDep&&!b.dep)b.dep={at:now(),rv:READER_VER,back:1};if(I.toDep&&b.dep&&!(b.chunks||[]).length)b.dep.full=1;
     while(JSON.stringify(b).length>200000&&b.imports.length>1)b.imports.shift();
     b.count=b.chunks.reduce((n,ch)=>n+(M.chunks.get(ch.id)?.qs.length||0),0);b.updatedAt=now();
     await saveBook(b);rebuildQ();
@@ -6696,7 +6763,7 @@ function bookCoverage(b){
   const T=Math.max(...rs.map(r=>r.total||0));if(!T)return null;const arr=new Array(T).fill('-');
   for(const r of rs){const m=unrle(r.map);for(let i=0;i<m.length;i++){const p=r.from+i-1;if(p>=0&&p<T&&COV[m[i]].rank>COV[arr[p]].rank)arr[p]=m[i]}}
   const fx=b.fixed||{};if(Object.keys(fx).length){const open=new Set(),done=new Set();for(const r of lastImports(b))for(const x of r.lost||[]){if(x.p==null)continue;(fx[x.k]?done:open).add(x.p)}
-    for(let p=1;p<=T;p++){const c=arr[p-1];if(!'PXFEU'.includes(c)||open.has(p))continue;if(fx['page|'+p]||c!=='U'&&done.has(p))arr[p-1]='S'}}
+    for(let p=1;p<=T;p++){const c=arr[p-1];if(!'PXFEUN'.includes(c)||open.has(p))continue;if(c==='N'&&fx['page|'+p]!=='new')continue;if(fx['page|'+p]||c!=='U'&&done.has(p))arr[p-1]='S'}}
   return{map:arr.join(''),unit,T};
 }
 function bookCoveragePanel(b){
@@ -6756,7 +6823,7 @@ function lostList(I){const R=I.result,kept=impKeptIdx(I),out=[],seen=new Set(),c
 // ready for the question pool: every question page read (the 100% badge) and no question lost
 function depReady(b){return bookVerified(b)&&!depLost(b)}
 function depMissed(b){let n=0;for(const r of lastImports(b))n+=recLost(b,r,true);return n}
-function depMeta(b){const c=depCounts(b);return{bookId:b.id,name:b.name,dep:!!b.dep,verified:depReady(b),pagesComplete:bookVerified(b),lost:depLost(b),pct:depPct(b),coveredPages:c.cov,attentionPages:c.att,notImported:c.todo,
+function depMeta(b){const c=depCounts(b);return{bookId:b.id,full:!!(b.dep&&(b.dep.full||!bookQs(b.id).length)),name:b.name,dep:!!b.dep,verified:depReady(b),pagesComplete:bookVerified(b),lost:depLost(b),pct:depPct(b),coveredPages:c.cov,attentionPages:c.att,notImported:c.todo,
   questions:bookQs(b.id).length,missed:depMissed(b),readerVer:(b.dep&&b.dep.rv)||READER_VER,readerNow:READER_VER,appVer:APP_VER,map:c.map?rle(c.map):'',unit:c.unit||'page',file:b.source?.file||''}}
 function depStatusText(b){const m=depMeta(b);return`MCQ VAULT DEPOSITORY STATUS\nBook: ${b.name} (${b.id})\nFile: ${m.file}\nCoverage: ${m.pct} · ${m.coveredPages} ${m.unit}s read · ${m.attentionPages} need attention · ${m.notImported} not imported\nQuestions saved: ${m.questions} · not saved or not found: ${m.lost} (not found: ${m.missed})\nLast read with reader v${m.readerVer} (reader now v${READER_VER}, app v${APP_VER})\nPage map: ${m.map}\n`}
 async function gzB64(str){if(typeof CompressionStream!=='function')return null;
@@ -6858,7 +6925,7 @@ async function depAuto(){if(Cloud.mode!=='gas'||!S.on||S.depAutoRan)return;S.dep
 function viewDepository(){
   const list=depBooks();
   if(S.depBook){const b=M.books.get(S.depBook);if(b&&b.dep)return depBookView(b);S.depBook=null}
-  const intro=`<div class="stack" style="gap:4px"><h1>Depository</h1><p class="muted" style="max-width:72ch">Books wait here until the reader has read every page that holds questions. Their questions are not used in sessions, rounds or statistics. ${Cloud.mode==='gas'?'After each import the reader report and the page text are saved to your Drive folder “MCQ Vault Reader Reports”, where Claude checks them and fixes the reader. Whenever Claude saves a reader fix to that folder, Google’s servers re-read these books by themselves within 15 minutes, even with every device closed: no re-import, no new version.':''} Reader in use: v${READER_VER}.</p></div>`;
+  const intro=`<div class="stack" style="gap:4px"><div class="spread"><h1>Depository</h1>${checkNowBtn()}</div><p class="muted" style="max-width:72ch">Books wait here until the reader has read every page that holds questions. Their questions are not used in sessions, rounds or statistics. ${Cloud.mode==='gas'?'After each import the reader report and the page text are saved to your Drive folder “MCQ Vault Reader Reports”, where Claude checks them and fixes the reader. Whenever Claude saves a reader fix to that folder, Google’s servers re-read these books by themselves within 15 minutes, even with every device closed: no re-import, no new version.':''} Reader in use: v${READER_VER}.</p></div>`;
   if(!list.length)return intro+`<div class="panel flat empty"><h3>Nothing waiting</h3><p>New imports land here first. Books that read 100% get the badge and a button to add them to your questions.</p><button class="btn pri" data-a="nav" data-v="import">Import a book</button></div>`;
   return intro+(S.depBusy?`<div class="notice info">Checking “${esc(M.books.get(S.depBusy)?.name||'')}”: ${esc(S.depMsg||'')}</div>`:'')+`<div class="stack">${list.map(b=>{const ok=depReady(b),c=depCounts(b),n=bookQs(b.id).length,miss=depMissed(b),busy=S.depBusy===b.id;
     return`<div class="panel"><div class="spread"><h3 style="overflow-wrap:anywhere">${esc(b.name)} ${ok?VBADGE:''}${reqPill(b)}</h3><span class="pill ${ok?'ok':'warn'}">${ok?'Ready: reads 100%':'Waiting for reader fix'}</span></div>
@@ -6959,7 +7026,7 @@ function viewSettings(){
   </div>
   <div class="panel"><h3>This device</h3>
     <div class="row"><label class="field" style="flex:1;min-width:200px"><span>Device name (shown in session history)</span><input type="text" id="devname" value="${esc(S.devName)}"></label><button class="btn" data-a="saveDev" style="align-self:flex-end">Save</button></div>
-    <p class="muted small">App version ${APP_VER} · reader v${READER_VER} · the session in progress is shared by all your devices</p>
+    <p class="muted small">App version ${verName(APP_VER)} · reader v${READER_VER} · the session in progress is shared by all your devices</p>
     ${devs.size?`<div class="tbl-wrap"><table><thead><tr><th>Device</th><th class="n">Answers</th><th>Last activity</th></tr></thead><tbody>${[...devs].map(([d,x])=>`<tr><td>${esc(d===S.dev?S.devName+' (this device)':x.name||d)}</td><td class="n">${nf(x.n)}</td><td>${x.last?fmtDate(x.last):''}</td></tr>`).join('')}</tbody></table></div>`:''}
   </div>
   <div class="panel"><h3>Backups</h3>
@@ -7686,6 +7753,10 @@ document.addEventListener('click',async e=>{
     case'closeBook':S.libBook=null;render();break;
     case'studyList':{const ids=currentLibList();await startSession({books:[],topics:[],source:'all',order:'book',count:100,timing:'none',sec:60,min:45,feedback:'instant'},ids);break}
     case'editQ':editQ(d.id);break;
+    case'gEdit':S.gEdit=!S.gEdit;render();break;
+    case'gQuickSave':gQuickSave();break;
+    case'checkNow':checkNow();break;
+    case'impDep':impDep();break;
     case'theme':cycleTheme();break;
     case'setTheme':setTheme(d.k);break;
     case'lang':I18N.set(I18N.lang==='ar'?'en':'ar');break;
