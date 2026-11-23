@@ -2111,6 +2111,10 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"See the question after the edit":"اعرض السؤال بعد التعديل",
+"The question after the edit":"السؤال بعد التعديل",
+"Not applied yet":"لم يُطبَّق بعد",
+"This is how the question will look for everyone after you approve.":"هكذا سيظهر السؤال للجميع بعد موافقتك.",
 "Apply changes and send reply":"طبّق التعديلات وأرسل الرد",
 "Reply only, without changes":"رد فقط، بدون تعديلات",
 "See the edited question":"اعرض السؤال بعد التعديل",
@@ -3956,14 +3960,16 @@ const Admin=(()=>{
       ${q.v?`<p class="small muted" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.v)}</p>`:''}<p data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.s)}</p><ol type="A" class="small" data-notr>${(q.o||[]).map((o,i)=>`<li${(q.a||'').includes('ABCDEFGHIJKLMNOPQRSTUVWXYZ'[i])?' style="font-weight:700"':''}>${esc(o)}</li>`).join('')}</ol>
       ${q.e?`<p class="small"><span class="muted">Explanation in the app:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.e)}</span></p>`:`<p class="small muted">No explanation in the app.</p>`}</details>`}
   /* the question as it is now in the library, after the checker's edits (23 Nov 2026) */
-  function repView(id){const r=(A.reps||[]).find(x=>x.id===id),q=r&&r.fq;if(!q||!q.s)return toast('The question could not be loaded. Reload the reports and try again.');
-    const w=(r.applied&&r.applied.what)||[],hl=k=>w.includes(k)?' class="repchg"':'',L='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    modal(`<h3>The question now</h3><p class="small muted"><span data-notr>${esc(q.bookName||'')}${q.num?' · Q'+esc(q.num):''}${q.p?' · p.'+esc(q.p):''}</span>${w.length?' · <span>Changed by the checker:</span> <span class="repchg">highlighted</span>':''}</p>
+  function repView(id,pre){const r=(A.reps||[]).find(x=>x.id===id);let q=r&&r.fq;if(!q||!q.s)return toast('The question could not be loaded. Reload the reports and try again.');
+    let w=(r.applied&&r.applied.what)||[];const L='ABCDEFGHIJKLMNOPQRSTUVWXYZ',ai=r.ai||{};
+    if(pre){q=Object.assign({},q);w=[];['s','o','v','a','e'].forEach(k=>{if(ai[k]&&ai[k].length){q[k]=Array.isArray(ai[k])?ai[k].slice():ai[k];w.push(k)}})}
+    const hl=k=>w.includes(k)?' class="repchg"':'';
+    modal(`<h3>${pre?'The question after the edit':'The question now'}</h3>${pre?'<p class="small"><span class="pill warn">Not applied yet</span> <span>This is how the question will look for everyone after you approve.</span></p>':''}<p class="small muted"><span data-notr>${esc(q.bookName||'')}${q.num?' · Q'+esc(q.num):''}${q.p?' · p.'+esc(q.p):''}</span>${w.length?' · <span>Changed by the checker:</span> <span class="repchg">highlighted</span>':''}</p>
       ${q.v?`<p${hl('v')} data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.v)}</p>`:''}<p${hl('s')} data-notr style="white-space:pre-wrap;overflow-wrap:anywhere;font-weight:600">${esc(q.s)}</p>
       <ol type="A"${hl('o')} data-notr>${(q.o||[]).map((o,i)=>`<li${(q.a||'').includes(L[i])?` style="font-weight:700"`:''}>${esc(o)}</li>`).join('')}</ol>
       <p><span class="muted">Answer:</span> <b${hl('a')} data-notr>${esc(q.a||'—')}</b></p>
       ${q.e?`<p class="small"><span class="muted">Explanation:</span><br><span${hl('e')} data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(q.e)}</span></p>`:''}
-      <div class="row" style="justify-content:flex-end"><button class="btn pri" data-a="closeModal">Close</button></div>`)}
+      <div class="row" style="justify-content:flex-end">${pre&&r.st!=='done'?`<button class="btn pri" data-ad="admRepApply" data-k="${esc(r.id)}">Apply changes and send reply</button><button class="btn" data-a="closeModal">Close</button>`:'<button class="btn pri" data-a="closeModal">Close</button>'}</div>`)}
   function repAi(r){const ai=r.ai;if(r.st==='done'&&!ai)return'';if(!ai)return`<p class="small muted" style="margin:6px 0 0">Waiting for the checker. It reads the book twice a day (8:17 AM and 8:17 PM Baghdad time), or within an hour after Check now.</p>`;const v=AIV[ai.verdict]||AIV.unsure;
     return`<div class="notice info repai" style="margin-top:6px"><b>The checker recommends</b> <span class="pill ${v[0]}">${v[1]}</span>${r.applied?` <span class="pill ok">${r.applied.by==='checker'?'Fixed by the checker':'Applied'}</span>`:''}${r.undone?` <span class="pill warn">Undone</span>`:''}
       ${ai.why?`<br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.why)}</span>`:''}
@@ -3975,7 +3981,7 @@ const Admin=(()=>{
       ${ai.e?`<br><span>New explanation:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.e)}</span>`:''}
       ${ai.src?`<br><span class="muted small">Source in the book:</span> <span class="small" data-notr>${esc(ai.src)}</span>`:''}
       ${ai.reply?`<br><span class="muted small">Suggested reply:</span> <span class="small" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.reply)}</span>`:''}
-      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Apply changes and send reply</button>`:''}${ai.verdict!=='fix'&&ai.reply?`<button class="btn sm pri" data-ad="admRepOk" data-k="${esc(r.id)}">Approve: send this reply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm pri" data-ad="admRepView" data-k="${esc(r.id)}">See the edited question</button><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
+      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Apply changes and send reply</button>${r.fq&&r.fq.s?`<button class="btn sm" data-ad="admRepPrev" data-k="${esc(r.id)}">See the question after the edit</button>`:''}`:''}${ai.verdict!=='fix'&&ai.reply?`<button class="btn sm pri" data-ad="admRepOk" data-k="${esc(r.id)}">Approve: send this reply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm pri" data-ad="admRepView" data-k="${esc(r.id)}">See the edited question</button><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
   function vRep(){const L=A.reps||[],op=L.filter(r=>r.st!=='done'),dn=L.filter(r=>r.st==='done').slice(0,40);
     const card=r=>`<div class="nitem" data-rep="${esc(r.id)}"><div class="spread"><span><span class="pill ${r.k==='issue'?'acc':'bad'}">${REP_K[r.k]||'Issue'}</span> <b data-notr>${esc(r.n||r.u)}</b> <span class="muted small" data-notr>(${esc(r.u)})</span></span><span class="muted small">${fmtDate(r.at)}</span></div>
       ${repFull(r)}
@@ -4135,6 +4141,7 @@ const Admin=(()=>{
       if(k==='admRepUse'){const r=(A.reps||[]).find(o=>o.id===d.k),el=$('#rr-'+d.k);if(r&&r.ai&&el){el.value=r.ai.reply;el.focus()}return}
       if(k==='admRepApply'){const r0=(A.reps||[]).find(x=>x.id===d.k);const m=val('rr-'+d.k).trim()||(r0&&r0.ai&&r0.ai.reply)||'';await gas('adm_rep',{id:d.k,apply:1,m});toast('Applied. The question is corrected for everyone, and the user has the reply.',6000);await load(true);if(S.on)pull(false);repView(d.k);return}
       if(k==='admRepView'){repView(d.k);return}
+      if(k==='admRepPrev'){repView(d.k,1);return}
       if(k==='admRepOk'){const r=(A.reps||[]).find(x=>x.id===d.k);if(!r||!r.ai||!r.ai.reply)return;await gas('adm_rep',{id:d.k,m:r.ai.reply});toast('Reply sent.');await load(true);return}
       if(k==='admRepUndo'){await gas('adm_rep',{id:d.k,undo:1});toast('Undone. The question has its old text again, and the report is open.',6000);await load(true);if(S.on)pull(true);return}
       if(k==='admRepRecheck'){await gas('adm_rep',{id:d.k,recheck:1});toast('Sent back to the checker.');await load(true);return}
