@@ -412,7 +412,7 @@ body.role-user [data-a="delBook"],body.role-user [data-a="depBack"],body.role-us
 <header class="top">
   <div class="top-in">
     <div class="brandrow">
-      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span>MCQ Vault<span class="appver" id="appver" title="App version on this device">v3.0</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
+      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span>MCQ Vault<span class="appver" id="appver" title="App version on this device">v3.1</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
       <div class="right"><button class="accbtn" id="accbtn" data-a="nav" data-v="settings" hidden></button><button class="sync" id="sync" data-a="nav" data-v="settings" title="Sync status"><span class="dot"></span><span id="synctxt">Starting…</span></button>
       <button class="themebtn bellbtn" id="bellbtn" data-ad="bell" aria-label="Notifications" title="Notifications" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.300 21a1.940 1.940 0 0 0 3.400 0"/></svg><span class="belln" hidden></span></button>
       <button class="themebtn langbtn" id="langbtn" data-a="lang" title="العربية" aria-label="التبديل إلى العربية" data-notr>ع</button>
@@ -2111,6 +2111,15 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Specialty of a new book":"تخصص الكتاب الجديد",
+"Auto (from the book name)":"تلقائي (من اسم الكتاب)",
+"Every specialty":"كل التخصصات",
+"Several files":"عدة ملفات",
+"All files are done.":"انتهت كل الملفات.",
+"Next file starts now.":"يبدأ الملف التالي الآن.",
+"0 questions read: the checker will read it":"لم يُقرأ أي سؤال: سيقرؤه المدقق",
+"questions, read 100%: ready in the Depository":"سؤالًا، مقروء 100%: جاهز في المستودع",
+"questions, not read 100%: the checker finishes it":"سؤالًا، غير مقروء 100%: يكمله المدقق",
 "See the question after the edit":"اعرض السؤال بعد التعديل",
 "The question after the edit":"السؤال بعد التعديل",
 "Not applied yet":"لم يُطبَّق بعد",
@@ -3378,7 +3387,7 @@ function adoptActive_(w,boot){
 }
 
 // every device shows its version; when the server has a newer one, say so and offer a reload
-const APP_VER=48;
+const APP_VER=49;
 async function verCheck(){if(Cloud.mode!=='gas'||!S.on)return;meLoad();try{const v=await gas('api_ver');if(v&&v.nt&&v.nt>(NOTES.nt||0))notesLoad();if(v&&v.ver>APP_VER){const el=$('#newver');el.innerHTML=`<span>A newer version (v${verName(v.ver)}) is available. This device has v${verName(APP_VER)}.</span><a href="${Cloud.via==='api'?'./':esc(v.url||'')}" target="${Cloud.via==='api'?'_self':'_top'}">Reload now</a>${v.apk&&/^https:[^\s"<>]+$/.test(v.apk)?` <a href="${esc(v.apk)}" target="_blank" rel="noopener">Download the new app</a>`:''}`;el.hidden=false}}catch(e){}}
 
 /*ACCOUNTS-START*/
@@ -6486,10 +6495,11 @@ function viewImport(){
     <div class="grid2">
       <label class="field"><span>Add to</span><select id="imp-book"><option value="">A new book</option>${books.map(b=>`<option value="${b.id}" ${I.bookId===b.id?'selected':''}>${esc(b.name)}</option>`).join('')}</select></label>
       <label class="field"><span>New book name</span><input type="text" id="imp-name" value="${esc(I.name)}" placeholder="e.g. Kaplan & Sadock Review, 3rd ed."></label>
+      <label class="field"><span>Specialty of a new book</span><select id="imp-sp"><option value="" ${!I.sp?'selected':''}>Auto (from the book name)</option><option value="all" ${I.sp==='all'?'selected':''}>Every specialty</option>${SPECS.map(s=>`<option value="${s[0]}" ${I.sp===s[0]?'selected':''} data-notr>${esc(I18N.lang==='ar'?s[2]:s[1])}</option>`).join('')}</select></label>
     </div>
     <div class="field"><span>Book file (PDF, Word .docx, or .txt)</span>
       <div class="row"><label class="btn" for="imp-file">Choose file</label><span id="imp-fname" class="small ${I.file?'':'muted'}" style="min-width:0;overflow-wrap:anywhere">${I.file?esc(I.file.name)+' · '+fmtSize(I.file.size):'No file chosen'}</span></div>
-      <input type="file" id="imp-file" class="vh">
+      <input type="file" id="imp-file" class="vh" multiple accept=".pdf,.docx,.txt,application/pdf,text/plain">${I.queue&&I.queue.length?`<p class="small"><b>${I.queue.length+1} files chosen.</b> <span>They are imported one after another with these settings. Each new book takes its file name. A book read 100% goes to the library, any other book goes to the Depository for the checker.</span></p>`:''}
       <p class="small muted" style="font-weight:400">On a phone: if tapping "Choose file" does nothing, the app you opened this in can't open files. Open the page in your phone's browser (Chrome or Safari) instead, or send the book to Claude in chat to have it imported for you.</p></div>
     <div id="kindslot">${I.kindMsg?`<p class="small muted">${esc(I.kindMsg)}</p>`:''}${kindBar(I.kind)}</div>
     <div class="row">
@@ -6564,6 +6574,7 @@ function impDone(){
   const allOk=!failedBlocks&&!I.err;
   return`<div class="stack" style="gap:4px"><h1>${allOk?'Import finished':'Import needs a retry'}</h1><p class="muted">${esc(I.fileName)} → ${esc(b?.name||I.plan?.book.name||'')} · ${I.unit==='section'?'sections':'pages'} ${I.from}–${I.to} of ${nf(I.total)}</p></div>
   ${kindBar(I.kind,{short:true})}
+  ${impBatchBox(I)}
   ${I.err?`<div class="notice bad">${esc(I.err)} Nothing is lost: press Retry and only the missing parts are sent again.</div>`:''}
   ${failedBlocks&&!I.err?`<div class="notice bad">${nf(c.failed)} questions in ${failedBlocks} block${failedBlocks>1?'s':''} did not reach the cloud. Press Retry to send only those again.</div>`:''}
   ${allOk?`<div class="notice info">${nf(c.saved)} questions were uploaded and each block was read back from the cloud to confirm it arrived complete.</div>`:''}
@@ -6575,7 +6586,7 @@ function impDone(){
 
 async function impRead(){
   const I=S.imp;const f=I.file||$('#imp-file').files[0];I.bookId=$('#imp-book').value;I.name=cleanBookName($('#imp-name').value);I.method=$('input[name=meth]:checked').value;
-  I.heading=$('#imp-head').value.trim();S.lastHeading=I.heading;I.defaultTopic=$('#imp-deft').value.trim()||'General';
+  I.heading=$('#imp-head').value.trim();S.lastHeading=I.heading;{const sp=$('#imp-sp');if(sp)I.sp=sp.value}if(I.queue&&I.queue.length)I.batch=1;I.defaultTopic=$('#imp-deft').value.trim()||'General';
   const from=parseInt($('#imp-from').value)||0,to=parseInt($('#imp-to').value)||0;
   if(!f){toast('Choose the book file first');return}if(!I.bookId&&!I.name){toast('Give the new book a name');return}
   if(from&&to&&to<from){toast('"To page" must be after "From page"');return}
@@ -6586,14 +6597,15 @@ async function impRead(){
     if(!r.pages.length)throw new Error('that page range is outside the file');
     I.pages=r.pages;I.chars=r.chars;I.unit=r.pseudo?'section':'page';I.total=r.total;I.from=r.from;I.to=r.to;
     I.kind=r.kind||summarizeKind({},/\.docx$/i.test(f.name)?'docx':'txt');I.cover=r.cover||null;
-  }catch(e){console.error(e);I.step='pick';render();toast('Could not read the file: '+(e.message||e));return}
+  }catch(e){console.error(e);I.step='pick';render();toast('Could not read the file: '+(e.message||e));if(I.batch){(S.impBatch=S.impBatch||[]).push({n:I.name,skip:'skipped: the file could not be read'});return impNext(I)}return}
   S.lastFile={file:f,bookId:I.bookId};
-  if(I.kind?.k==='scan'){I.step='pick';render();toast('This PDF has no text to read. Run it through OCR first, then import the OCR version.',8000);return}
+  if(I.kind?.k==='scan'){I.step='pick';render();toast('This PDF has no text to read. Run it through OCR first, then import the OCR version.',8000);if(I.batch){(S.impBatch=S.impBatch||[]).push({n:I.name,skip:'skipped: no text to read (needs OCR)'});return impNext(I)}return}
   if(I.method==='ai'){await aiExtract()}else{I.step='parsing';I.msg='Finding questions…';render();await sleep(30);
     try{I.result=Reader.parse(I.pages,{heading:I.heading||undefined,defaultTopic:I.defaultTopic})}catch(e){console.error(e);toast('Extraction failed: '+e.message);I.step='pick';render();return}
     if(I.result.questions.some(q=>q.fig)&&/\.pdf$/i.test(f.name)){I.msg='Copying figures and tables…';render();
       try{I.figs=await copyFigures(f,I.result.questions,(k,n)=>{I.msg=`Copying figures and tables: page ${k} of ${n}`;if(S.view==='import')render()})}catch(e){console.error(e);I.figs=0;toast('Could not copy the figures: '+(e.message||e),6000)}}
-    I.excluded=new Set();I.step='review';I.revPage=0;render()}
+    I.excluded=new Set();I.step='review';I.revPage=0;render();
+    if(I.batch&&S.imp===I){await sleep(400);const c=impQCounts(I);return c.kept&&impFull(I)?impSave():impDep()}}
 }
 /* ---- Claude-assisted extraction ---- */
 const normT=s=>(s||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
@@ -6731,7 +6743,7 @@ async function impSaveOffline(){const I=S.imp,P=I.plan;I.step='saving';I.msg='Sa
 async function impFinish(){const I=S.imp,P=I.plan;
   for(const blk of P.blocks)for(const i of blk.src)I.qState[i]=blk.st==='ok'?'S':'U';
   try{
-    const base=M.books.get(P.book.id);const b=base?clone(base):clone(P.book);
+    const base=M.books.get(P.book.id);const b=base?clone(base):clone(P.book);if(I.sp&&!base&&isAdm())b.sp=I.sp;
     b.nextSeq=Math.max(b.nextSeq||1,P.nextSeq);b.nextChunk=Math.max(b.nextChunk||0,P.nextChunk);
     for(let i=b.topics.length;i<P.book.topics.length;i++)b.topics.push(P.book.topics[i]);
     b.chunks=b.chunks||[];for(const blk of P.blocks)if(blk.st==='ok'&&!b.chunks.some(c=>c.id===blk.id))b.chunks.push({id:blk.id,v:1});
@@ -6743,11 +6755,17 @@ async function impFinish(){const I=S.imp,P=I.plan;
     b.imports=(b.imports||[]).filter(r=>r.id!==rep.id);b.imports.push(rep);if(b.dep)b.dep={...b.dep,rv:READER_VER};if(I.toDep&&!b.dep)b.dep={at:now(),rv:READER_VER,back:1};if(I.toDep&&b.dep&&!(b.chunks||[]).length)b.dep.full=1;
     while(JSON.stringify(b).length>200000&&b.imports.length>1)b.imports.shift();
     b.count=b.chunks.reduce((n,ch)=>n+(M.chunks.get(ch.id)?.qs.length||0),0);b.updatedAt=now();
-    await saveBook(b);rebuildQ();
+    await saveBook(b);rebuildQ();if(I.batch)(S.impBatch=S.impBatch||[]).push({n:b.name,q:b.count||0,full:!!(b.dep&&b.dep.full),ok:impFull(I)});
   }catch(e){console.error(e);I.err=`The questions were uploaded, but the book's index could not be saved (${e.code||e.message}).`}
   I.step='done';render();scrollTo(0,0);
   depSend(I,P.book.id);
+  if(I.queue&&I.queue.length)impNext(I);
 }
+async function impNext(prev){const q=(prev.queue||[]).slice(),f=q.shift();if(!f)return;await sleep(800);
+  const I=newImp('',{method:prev.method==='ai'?'ai':'pattern'});I.file=f;I.name=cleanBookName(f.name);I.sp=prev.sp||'';I.heading=prev.heading||'';I.defaultTopic=prev.defaultTopic||'General';I.queue=q;I.batch=1;
+  S.imp=I;if(S.view!=='import')go('import');else render();await sleep(80);if(S.imp===I&&I.step==='pick')impRead()}
+function impBatchBox(I){const L=S.impBatch||[],n=(I.queue||[]).length;if(L.length<2&&!n)return'';
+  return`<div class="notice info"><b>Several files</b><ul class="small" style="margin:4px 0">${L.map(x=>`<li><b data-notr>${esc(x.n)}</b>: ${x.skip?esc(x.skip):x.full?'<span>0 questions read: the checker will read it</span>':nf(x.q)+(x.ok?' <span>questions, read 100%: ready in the Depository</span>':' <span>questions, not read 100%: the checker finishes it</span>')}</li>`).join('')}</ul>${n?`<span>Next file starts now.</span> <span>${n} left.</span>`:'<span>All files are done.</span>'}</div>`}
 function docCount(){let n=M.books.size;for(const b of M.books.values())n+=(b.chunks||[]).length;n+=M.logs.size;return n}
 
 /* ---- book-level coverage (all imports combined) ---- */
@@ -7826,9 +7844,10 @@ document.addEventListener('change',e=>{
   if(t.id==='libt'){S.libTopic=t.value;S.libPage=0;render()}
   if(t.id==='libf'){S.libFilter=t.value;S.libPage=0;render()}
   if(t.id==='restore'&&t.files[0])restore(t.files[0]);
+  if(t.id==='imp-sp'&&S.imp)S.imp.sp=t.value;
   if(t.id==='imp-file'&&t.files[0]&&S.imp){const f=t.files[0];
     if(!/\.(pdf|docx|txt)$/i.test(f.name)&&!['application/pdf','text/plain'].includes(f.type)){toast('Choose a PDF, Word (.docx) or .txt file');t.value='';return}
-    S.imp.file=f;S.imp.kind=null;{const ni=$('#imp-name');if(ni&&!ni.value.trim()){ni.value=cleanBookName(f.name);S.imp.name=ni.value}}const fn=$('#imp-fname');if(fn){fn.textContent=f.name+' · '+fmtSize(f.size);fn.classList.remove('muted')}probeFile(f)}
+    S.imp.file=f;S.imp.kind=null;{const more=isAdm()?[...t.files].slice(1).filter(x=>/\.(pdf|docx|txt)$/i.test(x.name)):[],had=(S.imp.queue||[]).length;S.imp.queue=more;S.impBatch=[];if(more.length||had){const sp=$('#imp-sp');if(sp)S.imp.sp=sp.value;const ni=$('#imp-name');S.imp.name=ni&&ni.value.trim()?ni.value:cleanBookName(f.name);setTimeout(render,0)}}{const ni=$('#imp-name');if(ni&&!ni.value.trim()){ni.value=cleanBookName(f.name);S.imp.name=ni.value}}const fn=$('#imp-fname');if(fn){fn.textContent=f.name+' · '+fmtSize(f.size);fn.classList.remove('muted')}probeFile(f)}
 });
 let searchT;document.addEventListener('input',e=>{if(e.target.id==='tsearch'){const q=normTopic(e.target.value);for(const el of $$('#tlist [data-tn]'))el.hidden=!!q&&!el.dataset.tn.includes(q);return}if(e.target.id==='libq'){clearTimeout(searchT);searchT=setTimeout(()=>{S.libQuery=e.target.value;S.libPage=0;render();const i=$('#libq');i.focus();i.setSelectionRange(i.value.length,i.value.length)},300)}});
 document.addEventListener('keydown',e=>{
