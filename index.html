@@ -2114,6 +2114,7 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"In the Depository":"في المستودع",
 "More":"المزيد",
 "No specialty set":"بلا تخصص",
 "All specialties":"كل التخصصات",
@@ -4077,10 +4078,10 @@ const Admin=(()=>{
       ${L.length?`<div class="tbl-wrap"><table><thead><tr><th>Book</th><th>Requested by</th><th>Sent</th><th class="n">Questions</th><th>Reads</th><th></th></tr></thead><tbody>${L.map(b=>`<tr><td data-notr>${esc(b.name)}</td><td data-notr>${esc(b.req.n||b.req.u)}${b.req.sp?' · '+esc(spName(b.req.sp)):''}</td><td>${fmtDay(b.req.at)}</td><td class="n">${nf(bookQs(b.id).length)}</td><td>${depReady(b)?'<span class="pill ok">100%</span>':`<span class="pill warn">${depPct(b)}</span>`}</td>
         <td><span class="row" style="gap:6px"><button class="btn sm pri" data-ad="admReqOpen" data-k="${b.id}">Open</button><button class="btn sm danger" data-a="delBook" data-id="${b.id}">Delete</button></span></td></tr>`).join('')}</tbody></table></div>`:`<p class="muted">No requests waiting.</p>`}
       ${done.length?`<p class="muted small">Added from requests: <span data-notr>${done.map(b=>esc(b.name)).join(', ')}</span></p>`:''}</div>`}
-  function vBooks(){const L=libBooks().sort((a,b)=>a.name.localeCompare(b.name));
-    return`<div class="panel"><h3>Who sees each book</h3><p class="small" style="max-width:76ch">Users see the books of their own specialty. A book with no specialty is shown to everyone.</p>
+  function vBooks(){const L=[...M.books.values()].filter(b=>!b.deleted&&(b.dep||libBooks().includes(b))).sort((a,b)=>(!!b.dep-!!a.dep)||a.name.localeCompare(b.name));
+    return`<div class="panel"><h3>Who sees each book</h3><p class="small" style="max-width:76ch">Users see the books of their own specialty. A book with no specialty set goes to the specialty in its name (shown as auto), otherwise to the main account's specialty. Choose Everyone to show a book to all users. Books still in the Depository are listed first, so you can set their specialty before you add them.</p>
       ${L.length?`<div class="tbl-wrap"><table><thead><tr><th>Book</th><th>Specialty</th></tr></thead><tbody>${L.map(b=>{const g=bookSpGuess(b);
-        return`<tr><td data-notr>${esc(b.name)}<br><span class="small muted">${nf((M.bookQ.get(b.id)||[]).length)}</span></td>
+        return`<tr><td><span data-notr>${esc(b.name)}</span>${b.dep?' <span class="pill warn">In the Depository</span>':''}<br><span class="small muted">${nf((M.bookQ.get(b.id)||[]).length||b.count||0)}</span></td>
         <td><select data-adc="bookSp" data-id="${b.id}" style="max-width:230px"><option value="" ${!b.sp?'selected':''} ${g&&!b.sp?'data-notr':''}>${g&&!b.sp?esc(spName(g))+(I18N.lang==='ar'?' (تلقائي)':' (auto)'):'Everyone'}</option>${g&&!b.sp||b.sp==='all'?`<option value="all" ${b.sp==='all'?'selected':''}>Everyone</option>`:''}${SPECS.map(s=>`<option value="${s[0]}" ${b.sp===s[0]?'selected':''} data-notr>${esc(I18N.lang==='ar'?s[2]:s[1])}</option>`).join('')}</select>${b.only?`<br>${onlyPill(b)} <button class="linkbtn small" data-ad="bookAll" data-k="${b.id}">Give to everyone in the specialty</button>`:''}</td>
         </tr>`}).join('')}</tbody></table></div>`:`<p class="muted">No books in the library yet.</p>`}</div>`}
   function vCfg(){const c=A.data.cfg,main=A.data.me.own;
