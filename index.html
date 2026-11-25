@@ -178,6 +178,9 @@ td.bkname{white-space:normal;overflow-wrap:anywhere;min-width:180px;max-width:42
 .reviewing{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 12px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);font-weight:700;font-size:.88rem}
 .backbtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none;padding:0}
 .backbtn[hidden]{display:none}
+.backbtn.lbl{width:auto;padding:0 10px 0 6px;gap:2px;display:inline-flex;align-items:center;font:inherit;font-size:13px;font-weight:700;max-width:130px;text-transform:none;letter-spacing:0}
+.backbtn .backlbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:520px){.brand:has(.backbtn:not([hidden])) .brandname{display:none}}
 .hcard.resumetop{margin-bottom:12px;border-color:var(--info)}
 .undo-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
 .figs{display:flex;flex-direction:column;gap:8px;margin:12px 0 4px}.figs img{max-width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:8px;padding:4px;cursor:zoom-in}
@@ -415,7 +418,7 @@ body.role-user [data-a="delBook"],body.role-user [data-a="depBack"],body.role-us
 <header class="top">
   <div class="top-in">
     <div class="brandrow">
-      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span>MCQ Vault<span class="appver" id="appver" title="App version on this device">v3.3</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
+      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span><span class="brandname">MCQ Vault</span><span class="appver" id="appver" title="App version on this device">v3.3</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
       <div class="right"><button class="accbtn" id="accbtn" data-a="nav" data-v="settings" hidden></button><button class="sync" id="sync" data-a="nav" data-v="settings" title="Sync status"><span class="dot"></span><span id="synctxt">Starting…</span></button>
       <button class="themebtn bellbtn" id="bellbtn" data-ad="bell" aria-label="Notifications" title="Notifications" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.300 21a1.940 1.940 0 0 0 3.400 0"/></svg><span class="belln" hidden></span></button>
       <button class="themebtn langbtn" id="langbtn" data-a="lang" title="العربية" aria-label="التبديل إلى العربية" data-notr>ع</button>
@@ -2114,6 +2117,8 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Chosen:":"اخترت:",
+"Tap your specialty below, then press the button.":"اضغط على تخصصك في الأسفل، ثم اضغط الزر.",
 "Applying…":"جارٍ التطبيق…",
 "Undoing…":"جارٍ التراجع…",
 "More":"المزيد",
@@ -3839,13 +3844,14 @@ const ONB={step:1,sp:'',ex:'',q:'',busy:false,err:'',edit:false};
 function onbCheck(){if($('#onbov')||$('#authov')||$('#gateov')||$('#viewov'))return;if(isAdm()||!ME||ME.sp)return;if(!S.on&&Cloud.mode)return;ONB.step=1;ONB.sp='';ONB.ex='';ONB.q='';ONB.edit=false;onbPaint()}
 function onbOpen(){ONB.step=1;ONB.sp=(ME&&ME.sp)||'';ONB.ex=(ME&&ME.ex)||'';ONB.q='';ONB.err='';ONB.edit=true;onbPaint()}
 function onbList(){const q=ONB.q.trim().toLowerCase();return SPECS.filter(s=>!q||s[1].toLowerCase().includes(q)||s[2].includes(q)).map(s=>`<button type="button" class="spopt${ONB.sp===s[0]?' on':''}" data-ad="onbSp" data-k="${s[0]}" data-notr>${esc(I18N.lang==='ar'?s[2]:s[1])}</button>`).join('')||`<p class="muted small">No specialty matches. Choose Other.</p>`}
+function onbChosen(){const x=SPECS.find(s=>s[0]===ONB.sp);return x?`<span>Chosen:</span> <b data-notr>${esc(I18N.lang==='ar'?x[2]:x[1])}</b>`:`<span class="muted">Tap your specialty below, then press the button.</span>`}
 function onbPaint(){let ov=$('#onbov');if(!ov){ov=document.createElement('div');ov.id='onbov';ov.setAttribute('role','dialog');document.body.appendChild(ov)}
   ov.innerHTML=`<div class="auth onb">${BRAND()}<div class="panel auth-card"><h2>Choose your specialty</h2>
     ${ONB.err?`<div class="notice bad">${esc(ONB.err)}</div>`:''}
     <p class="muted small">You get the question books of this specialty, and you choose which of them to study. You can change it later in Settings.</p>
+      <div class="row" style="align-items:center;margin:10px 0"><button class="btn pri" data-ad="onbSave" ${ONB.sp&&!ONB.busy?'':'disabled'}>${ONB.edit?'Save':'Start studying'}</button>${ONB.edit?`<button class="btn" data-ad="onbClose">Cancel</button>`:''}<span class="small" id="onb-chosen">${onbChosen()}</span></div>
       <input type="search" id="onb-q" placeholder="Search specialties" value="${esc(ONB.q)}" autocomplete="off" style="font-size:16px">
       <div class="splist" id="onb-list">${onbList()}</div>
-      <div class="row"><button class="btn pri" data-ad="onbSave" ${ONB.sp&&!ONB.busy?'':'disabled'}>${ONB.edit?'Save':'Start studying'}</button>${ONB.edit?`<button class="btn" data-ad="onbClose">Cancel</button>`:''}</div>
   </div></div>`}
 async function onbSave(){ONB.busy=true;ONB.err='';onbPaint();
   try{const st=await gas('acc_profile',{sp:ONB.sp});ONB.busy=false;const ov=$('#onbov');if(ov)ov.remove();const first=!ONB.edit;meSet(st);if(ONB.after){const k=ONB.after;ONB.after=null;return viewSet(k)}if(S.on)await pull(true);
@@ -4296,7 +4302,7 @@ document.addEventListener('click',e=>{const el=e.target.closest('[data-ad]');if(
   if(k==='gateGo')return gateGo();
   if(k==='gateRetry')return gateRetry();
   if(k==='gateOut'){const ov=$('#gateov');if(ov)ov.remove();ME=null;return accAct('accOutGo',{k:''})}
-  if(k==='onbSp'){ONB.sp=d.k;document.querySelectorAll('#onb-list .spopt').forEach(b=>b.classList.toggle('on',b.dataset.k===d.k));const n=$('#onbov [data-ad=onbSave]');if(n)n.disabled=!!ONB.busy;return}
+  if(k==='onbSp'){ONB.sp=d.k;document.querySelectorAll('#onb-list .spopt').forEach(b=>b.classList.toggle('on',b.dataset.k===d.k));const n=$('#onbov [data-ad=onbSave]');if(n)n.disabled=!!ONB.busy;const c=$('#onb-chosen');if(c)c.innerHTML=onbChosen();return}
   if(k==='onbSave')return onbSave();
   if(k==='onbOpen')return onbOpen();
   if(k==='onbClose'){const ov=$('#onbov');if(ov)ov.remove();return}
@@ -4642,7 +4648,9 @@ function navIgnore(){NAV.ign++;clearTimeout(NAV.ignT);NAV.ignT=setTimeout(()=>{N
 // while the browser is still stepping back, new history entries wait, then go in, in order
 function navFlushPend(){if(!NAV.pend)return;NAV.pend=false;clearTimeout(NAV.pendT);const q=NAV.after||[];NAV.after=[];
   for(const n of q)if(n<NAV.stack.length){const s={...NAV.stack[n]};delete s.y;try{navApi().push({mv:1,n,s},s.v)}catch(e){}}}
-function navBtn(){const b=$('#backbtn');if(b)b.hidden=NAV.i<=0&&!overlayOpen()}
+const NAVLBL={quiz:'Session',summary:'Results',bank:'Bank',stats:'Stats'};
+function navLbl(){if(overlayOpen())return'Close';const p=NAV.stack[NAV.i-1];if(!p)return'';const t=TABS.find(x=>x[0]===p.v);return NAVLBL[p.v]||(t?t[1]:'Back')}
+function navBtn(){const b=$('#backbtn');if(!b)return;b.hidden=NAV.i<=0&&!overlayOpen();if(b.hidden)return;const l=navLbl();let sp=b.querySelector('.backlbl');if(!sp){sp=document.createElement('span');sp.className='backlbl';b.appendChild(sp)}if(sp.dataset.k!==l){sp.dataset.k=l;sp.textContent=l}b.classList.add('lbl');b.title=l==='Close'?'Close':'Back to '+l;b.setAttribute('aria-label',b.title)}
 function navCommit(y0){
   if(NAV.restoring||!NAV.stack.length)return;
   const s=navSnap(),k=navKey(s),cur=NAV.stack[NAV.i];
@@ -4678,6 +4686,7 @@ function navBack(){
   if(NAV.wait)return;
   if(!overlayOpen()&&NAV.i<=0)return;
   const want=Math.max(0,NAV.i-1);
+  if(!overlayOpen()&&!NAV.pend){NAV.i=want;NAV.stack.length=want+1;navIgnore();NAV.pend=true;NAV.after=[];clearTimeout(NAV.pendT);NAV.pendT=setTimeout(navFlushPend,1000);navApply(NAV.stack[want]);try{history.back()}catch(e){}return}
   NAV.wait=setTimeout(()=>{NAV.wait=null;if(closeOverlays()){navBtn();return}NAV.i=want;NAV.stack.length=want+1;navApply(NAV.stack[want]);try{navApi().replace(navState(),NAV.stack[want].v)}catch(e){}},700);
   try{history.back()}catch(e){}}
 function overlayOpen(){return !$('#modal').hidden||!!document.querySelector('.figover')}
