@@ -2117,6 +2117,16 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Device errors":"أخطاء الأجهزة",
+"Errors from users' devices":"أخطاء من أجهزة المستخدمين",
+"Clear the list":"امسح القائمة",
+"When something goes wrong in the app or on the website, the device sends the error here by itself. The same error from many devices is one row with a count. Send the list to Claude to fix.":"عندما يحدث خطأ في التطبيق أو الموقع، يرسل الجهاز الخطأ إلى هنا تلقائيًا. الخطأ نفسه من أجهزة كثيرة يظهر في سطر واحد مع العدد. أرسل القائمة إلى Claude لإصلاحها.",
+"No errors from devices.":"لا أخطاء من الأجهزة.",
+"Android app":"تطبيق أندرويد",
+"website":"الموقع",
+"Accounts:":"الحسابات:",
+"The list is empty.":"القائمة فارغة.",
+"{} times":"{1} مرة",
 "Your session ({} of {} answered) is finished and saved in Statistics › Sessions.":"انتهت جلستك ({1} من {2} مُجاب) وحُفظت في الإحصاءات › الجلسات.",
 "The session could not be saved just now. Press Finish again.":"تعذّر حفظ الجلسة الآن. اضغط إنهاء مرة أخرى.",
 "Chosen:":"اخترت:",
@@ -3755,6 +3765,35 @@ setInterval(()=>{try{leaseTick()}catch(e){}},30000);
 addEventListener('offline',()=>{try{if(leaseOn()&&webOnly())gateCheck()}catch(e){}});
 addEventListener('online',()=>{try{const g=$('#gateov');if(g&&g.dataset.k==='offline'&&!GATE.busy)gateRetry()}catch(e){}});
 document.addEventListener('visibilitychange',()=>{try{if(document.visibilityState==='visible')leaseTick()}catch(e){}});
+/* ----- errors on this device go to Admin by themselves (25 Nov 2026) ----- */
+const ERR={q:[],seen:{},t:null};
+try{const o=JSON.parse(localStorage.getItem('mv-errq')||'[]');if(Array.isArray(o))ERR.q=o.slice(0,20)}catch(e){}
+function errKeep(){try{localStorage.setItem('mv-errq',JSON.stringify(ERR.q))}catch(e){}}
+function errNote(m,w,st){try{m=String(m||'');w=String(w||'');if(!m||/ResizeObserver|^Script error\.?$/i.test(m))return;const k=m+'|'+w;
+  ERR.seen[k]=(ERR.seen[k]||0)+1;if(ERR.seen[k]>5)return;const o=ERR.q.find(z=>z.m===m.slice(0,300)&&z.w===w.slice(0,200));if(o){o.n++;errKeep();return}if(ERR.q.length>=20)return;
+  let app=0;try{app=inApp()?1:0}catch(e){}
+  ERR.q.push({m:m.slice(0,300),w:w.slice(0,200),st:String(st||'').slice(0,1200),n:1,v:String(APP_VER),app,view:(typeof S!=='undefined'&&S&&S.view)||''});errKeep();
+  clearTimeout(ERR.t);ERR.t=setTimeout(errSend,5000)}catch(e){}}
+async function errSend(){clearTimeout(ERR.t);if(!ERR.q.length)return;if(!ACC||!S.on){ERR.t=setTimeout(errSend,60000);return}
+  const L=ERR.q.splice(0);errKeep();try{const r=await gas('rep_err',{list:L});if(r&&r.ok===false)throw new Error('busy')}catch(e){ERR.q=L.concat(ERR.q).slice(0,20);errKeep();ERR.t=setTimeout(errSend,60000)}}
+addEventListener('error',e=>{if(!e||!e.message)return;errNote(e.message,String(e.filename||'').split('\x2f').pop()+':'+(e.lineno||0)+':'+(e.colno||0),e.error&&e.error.stack)});
+addEventListener('unhandledrejection',e=>{const r=e&&e.reason;try{if(r&&isNetErr(r))return}catch(x){}errNote(r&&r.message||String(r),'promise',r&&r.stack)});
+setTimeout(()=>{if(ERR.q.length)errSend()},15000);
+/* ----- temporary session check for the main account (25 Nov 2026) ----- */
+const SCHK={sent:{}};
+function schkS(x){if(!x)return null;const q=x.qids||[],a=x.ans||{},un=[];q.forEach((id,i)=>{if(!a[id]&&un.length<6)un.push(i+1)});const dr=new Set(x.drop||[]);
+  return{sid:x.sid,e:x.ended?1:0,n:q.length,i:(x.idx||0)+1,a:Object.keys(a).length,un,ro:x.reopen||0,up:x.upd||0,st:x.startedAt||0,fx:x.cfg&&x.cfg.fix||0,wt:x.cfg&&x.cfg.want||0,mo:x.cfg&&x.cfg.more||0,dr:dr.size,drq:q.filter(id=>dr.has(id)).length,sc:String(x.cfg&&(x.cfg.scopeText||x.cfg.style)||'').slice(0,40)}}
+function schkR(id){const s=M.sessions.get(id);return s?{d:s.done?1:0,w:s.why||'',up:s.upd||0,en:s.en||0,n:s.n,p:s.planned,dv:String(s.dev||'').slice(0,8)}:null}
+async function schk(why){try{if(!ACC||!ACC.own||!S.on)return;const A=S.active,sh=S.shelf||[];
+  let w=null;try{w=await C().activeGet()}catch(e){w={err:String(e&&e.message||e).slice(0,80)}}
+  const ids=new Set([A&&A.sid,w&&w.sid,...sh.map(x=>x.sid),...((w&&w.shelf)||[]).map(x=>x.sid)].filter(Boolean));if(!ids.size)return;
+  const key=why+[...ids].join();if(SCHK.sent[key])return;SCHK.sent[key]=1;
+  const o={why,v:APP_VER,now:Date.now(),dev:String(S.dev||'').slice(0,8),app:inApp()?1:0,view:S.view,loc:schkS(A),cl:w&&w.err?w:schkS(w),
+    clClosed:w&&w.closed?Object.fromEntries([...ids].map(k=>[k,w.closed[k]||0])):0,
+    shL:sh.map(schkS),shC:((w&&w.shelf)||[]).map(schkS),rec:Object.fromEntries([...ids].map(k=>[k,schkR(k)])),done:[...ids].filter(k=>(S.doneSids||[]).includes(k)),
+    out:S.activeOut?{sid:S.activeOut.sid,e:S.activeOut.ended?1:0,up:S.activeOut.upd||0}:0};
+  const s=JSON.stringify(o);for(let i=0,p=1;i<s.length&&p<=4;i+=1400,p++)await gas('rep_add',{k:'issue',m:`[session check ${p}/${Math.ceil(s.length/1400)}] `+s.slice(i,i+1400)})}catch(e){console.warn('schk',e)}}
+setTimeout(()=>schk('load'),25000);
 /* ----- free questions, then the activation code ----- */
 function trialUsed(){if(!ME||!ME.trial)return 0;return Math.max(ME.trial.used||0,(M.att?M.att.length:0)+(M.exAtt?M.exAtt.length:0))}
 function gateNeed(){if(isAdm()||!ME||!ME.trial||!ME.trial.on)return'';if(leaseBad())return'offline';if(ME.lock)return ME.lock;if(ME.act)return ME.sub&&ME.sub<Date.now()?'sub':'';return trialUsed()>=ME.trial.n?'trial':''}
@@ -3984,14 +4023,24 @@ const Admin=(()=>{
   const fOk=(a,f)=>f==='all'||(f==='want'?!!a.want&&!a.del:f==='subend'?!!a.sub&&a.sub<now()&&!a.del:f==='subsoon'?!!a.sub&&a.sub>=now()&&a.sub<now()+7*DAY&&!a.del:f==='paid'?!!a.paid&&a.role!=='main':f==='unpaid'?!a.paid&&a.role!=='main'&&!a.del:stOf(a)===f);
   const stOf=a=>a.del?'off':a.role!=='user'?'admin':a.act?'act':a.lock?'wait':'trial';
   const ST={off:['bad','Switched off'],admin:['acc','Admin'],act:['ok','Activated'],wait:['warn','Waiting for a code'],trial:['','Free trial']};
+  async function errLoad(){if(A.errBusy)return;A.errBusy=true;A.errErr='';try{const r=await gas('adm_errs',{});A.errs=r.list||[]}catch(e){A.errErr=cleanErr(e)||'error'}A.errBusy=false;if(S.view==='admin'&&A.tab==='err')softRender()}
+  function vErr(){if(!A.errs&&!A.errBusy&&!A.errErr)errLoad();const L=A.errs||[];
+    return`<div class="panel"><div class="spread"><h3>Errors from users' devices</h3><div class="row"><button class="btn sm" data-ad="admErrReload">Refresh</button>${L.length?'<button class="btn sm" data-ad="admErrClear">Clear the list</button>':''}</div></div>
+      <p class="small muted" style="max-width:72ch">When something goes wrong in the app or on the website, the device sends the error here by itself. The same error from many devices is one row with a count. Send the list to Claude to fix.</p>
+      ${A.errErr?`<div class="notice bad">Could not load: ${esc(A.errErr)}</div>`:!A.errs?'<p class="muted">Loading…</p>':!L.length?'<div class="notice ok">No errors from devices.</div>':
+      `<div class="stack">${L.map(e=>`<div class="hcard" style="display:block"><b data-notr style="overflow-wrap:anywhere">${esc(e.m)}</b>
+        <p class="small muted" style="margin:4px 0 0"><span>${nf(e.n)} times</span> · <span data-notr>${esc(e.w)}</span> · <span>version</span> <span data-notr>${esc(verName(+e.v)||e.v)}</span> · ${e.app?'<span>Android app</span>':'<span>website</span>'}${e.view?` · <span data-notr>${esc(e.view)}</span>`:''}</p>
+        <p class="small muted" style="margin:2px 0 0"><span>Accounts:</span> <span data-notr>${esc((e.us||[]).join(', '))}</span> · <span>last</span> ${fmtDate(e.last)}</p>
+        ${e.st?`<details class="small"><summary>Details</summary><pre data-notr style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px">${esc(e.st)}</pre></details>`:''}</div>`).join('')}</div>`}</div>`}
   function view(){
     if(!isAdm())return`<h1>Admin</h1><div class="notice">Only admins can open this page.</div>`;
     if(!A.data&&!A.loading&&!A.err)load();
-    const tabs=[['over','Overview'],['users','Accounts'],['admins','Admins'],['notes','Notifications'],['rep','Reports'],['req','Book requests'],['books','Books'],['cfg','Settings']];
+    const tabs=[['over','Overview'],['users','Accounts'],['admins','Admins'],['notes','Notifications'],['rep','Reports'],['req','Book requests'],['books','Books'],['err','Device errors'],['cfg','Settings']];
     const head=`<div class="spread"><h1>Admin</h1><button class="btn sm" data-ad="admReload">Refresh</button></div>
       <div class="seg admtabs" role="group" aria-label="Admin sections">${tabs.map(([k,l])=>`<label><input type="radio" name="admtab" data-ad="admTab" data-k="${k}" ${A.tab===k?'checked':''}><span>${l}${k==='req'&&reqWaiting().length?` <span class="pill warn">${reqWaiting().length}</span>`:''}${k==='rep'&&repN()?` <span class="pill warn">${repN()}</span>`:''}</span></label>`).join('')}</div>`;
     if(A.tab==='req')return head+vReq();
     if(A.tab==='books')return head+vBooks();
+    if(A.tab==='err')return head+vErr();
     if(!A.data)return head+(A.err?`<div class="notice bad">${A.err==='offline'?`<span>The Admin page needs an internet connection.</span>${S.syncErr&&S.syncErr.message?` <span class="small muted" data-notr>(${esc(String(S.syncErr.message).slice(0,160))})</span>`:''}`:'Could not load: '+esc(A.err)} <button class="linkbtn" data-ad="admReload">Try again</button></div>`:`<p class="muted">Loading…</p>`);
     return head+(A.tab==='users'?vUsers():A.tab==='admins'?vAdmins():A.tab==='notes'?vNotes():A.tab==='rep'?vRep():A.tab==='cfg'?vCfg():vOver())}
   const AIV={fix:['bad','Fix needed'],ok:['ok','The app matches the book'],unsure:['warn','Not sure']};
@@ -4151,6 +4200,8 @@ const Admin=(()=>{
   async function act(k,d,el){
     try{
       if(k==='admWantF'){A.f='want';A.tab='users';render();return}
+      if(k==='admErrReload'){A.errs=null;A.errErr='';render();return}
+      if(k==='admErrClear'){await gas('adm_errs',{clear:1});A.errs=[];toast('The list is empty.');render();return}
       if(k==='admTab'){A.tab=d.k;closeModal();if(S.view!=='admin')go('admin');else render();return}
       if(k==='admReload'){A.data=null;A.err='';await load(true);if(S.on)pull(false);return}
       if(k==='admFilter'){A.tab='users';A.f=d.k;render();return}
@@ -5061,7 +5112,7 @@ async function finishQuiet(){const A=S.active;if(!sessDone(A))return;A._fin=1;
   toast(`Your session (${nf(A.qids.length)} of ${nf(A.qids.length)} answered) is finished and saved in Statistics \u203a Sessions.`,6000);softRender()}
 async function finishSession(why){
   const A=S.active;if(!A||A._fin)return;A._fin=1;stopTicker();
-  try{await saveSessionMeta(why)}catch(e){A._fin=0;console.warn('finish',e);toast('The session could not be saved just now. Press Finish again.',6000);return}S.summary={...A,endedAt:now(),why};S.active=null;await IDB.del('kv','active');endActive(A);flush();go('summary');
+  try{await saveSessionMeta(why)}catch(e){A._fin=0;console.warn('finish',e);toast('The session could not be saved just now. Press Finish again.',6000);return}S.summary={...A,endedAt:now(),why};S.active=null;setTimeout(()=>schk('after finish'),12000);await IDB.del('kv','active');endActive(A);flush();go('summary');
 }
 function viewSummary(){
   const A=S.summary;if(!A)return viewStudy();if(isExam(A))return examSummary(A);
