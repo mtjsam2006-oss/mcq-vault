@@ -178,6 +178,10 @@ td.bkname{white-space:normal;overflow-wrap:anywhere;min-width:180px;max-width:42
 .reviewing{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:8px 12px;border-radius:12px;background:var(--accent-soft);color:var(--accent-text);font-weight:700;font-size:.88rem}
 .backbtn{width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;flex:none;padding:0}
 .backbtn[hidden]{display:none}
+.pvwarn{background:#b91c1c;color:#fff;border-radius:12px;padding:12px 14px;margin:0 0 12px;display:flex;gap:10px 12px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 14px rgba(185,28,28,.35);border:2px solid #fca5a5}
+.pvwarn b{font-size:16px;display:block}.pvwarn .small{color:#fee2e2}
+.pvwarn .btn{background:#fff;color:#b91c1c;border-color:#fff;font-weight:700}
+.quiz .pvwarn{position:sticky;top:6px;z-index:6}
 .backbtn.lbl{width:auto;padding:0 10px 0 6px;gap:2px;display:inline-flex;align-items:center;font:inherit;font-size:13px;font-weight:700;max-width:130px;text-transform:none;letter-spacing:0}
 .backbtn .backlbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:520px){.brand:has(.backbtn:not([hidden])) .brandname{display:none}}
@@ -2117,6 +2121,11 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Admin view: these answers are NOT saved":"وضع المشرف: هذه الإجابات لا تُحفظ",
+"Nothing in this session counts in your progress, statistics or wrong bank. To study for real, switch to Student view.":"لا شيء في هذه الجلسة يُحسب في تقدمك أو إحصاءاتك أو بنك الأخطاء. للدراسة الفعلية، انتقل إلى وضع الطالب.",
+"Switch to Student view":"انتقل إلى وضع الطالب",
+"You are in Admin view: sessions here are NOT saved":"أنت في وضع المشرف: الجلسات هنا لا تُحفظ",
+"Use it to try the app as a student sees it. To study for real, switch to Student view.":"استخدمه لتجربة التطبيق كما يراه الطالب. للدراسة الفعلية، انتقل إلى وضع الطالب.",
 "Device errors":"أخطاء الأجهزة",
 "Errors from users' devices":"أخطاء من أجهزة المستخدمين",
 "Clear the list":"امسح القائمة",
@@ -4829,6 +4838,7 @@ function viewStudy(){
           <label><input type="radio" name="fb" value="instant" checked><span>After each question</span></label>
           <label><input type="radio" name="fb" value="end"><span>At the end (exam)</span></label></div></div>
         <span class="muted" id="poolcount" style="margin-top:4px">…</span>
+        ${admPreview()?`<div class="pvwarn" role="note"><span style="font-size:20px" aria-hidden="true">⚠</span><span style="flex:1;min-width:200px"><b>You are in Admin view: sessions here are NOT saved</b><span class="small">Use it to try the app as a student sees it. To study for real, switch to Student view.</span></span><button class="btn sm" data-ad="viewSet" data-k="student">Switch to Student view</button></div>`:''}
         <button class="btn pri big" data-a="start" ${total?'':'disabled'}>${ICON_PLAY} Start ${S.style==='exam'?'exam':'session'}</button>
       </div>
     </div>
@@ -5038,14 +5048,14 @@ function viewQuiz(){
       ${isExam(A)?`<div class="clock" id="clock" data-l="Exam" title="Time left for the whole exam">--:--</div><div class="clock" id="qclock" data-l="Question" title="Time left for this question">--:--</div>`:A.cfg.timing!=='none'?`<div class="clock" id="clock">--:--</div>`:''}</div>
     ${rv!=null?`<div class="reviewing"><span>Looking back at question ${rv+1}${exam?' · answers are shown at the end':''}</span><button class="btn sm" data-a="qcur">Back to question ${A.idx+1} →</button></div>`:''}`;
   const fwd=`<button class="btn pri" data-a="qfwd">${at+1>=A.idx?`Back to question ${A.idx+1}`:'Next'} →</button>`;
-  if(!q)return`<section class="quiz">${top}<div class="notice bad">This question is no longer in the library.</div><div class="qactions">${prevBtn}${rv!=null?fwd:`<button class="btn pri" data-a="next">Next</button>`}</div></section>`;
+  if(!q)return`<section class="quiz">${A.pv?`<div class="pvwarn" role="alert"><span style="font-size:22px" aria-hidden="true">⚠</span><span style="flex:1;min-width:200px"><b>Admin view: these answers are NOT saved</b><span class="small">Nothing in this session counts in your progress, statistics or wrong bank. To study for real, switch to Student view.</span></span><button class="btn sm" data-ad="viewSet" data-k="student">Switch to Student view</button></div>`:''}${top}<div class="notice bad">This question is no longer in the library.</div><div class="qactions">${prevBtn}${rv!=null?fwd:`<button class="btn pri" data-a="next">Next</button>`}</div></section>`;
   const bk=M.books.get(q.b),multi=q.a.length>1,rec=A.ans[qid];
   const rev=rv!=null?!!rec&&!exam:A.revealed&&rec,locked=rv!=null||rev;
   const opts=q.o.map((o,i)=>{let c='';if(rev){if(q.a.includes(i))c='right';else if(rec.ch.includes(LET[i]))c='wrong'}else if(rv!=null){if(rec&&rec.ch.includes(LET[i]))c='sel'}else if(A.sel.includes(i))c='sel';
     const tag=rev?(c==='right'?(rec.ch.includes(LET[i])?'Your answer · correct':'Correct'):c==='wrong'?'Your answer':''):rv!=null&&c==='sel'?'Your answer':'';
     return`<button class="opt ${c}" data-a="pick" data-i="${i}" ${locked?'disabled':''}><b>${LET[i]}</b><span>${esc(o)}</span>${tag?`<em>${tag}</em>`:''}</button>`}).join('');
   let seenN=1;for(const r of M.att)if(r.q===qid&&r.sid!==A.sid)seenN++;
-  return`<section class="quiz">${top}
+  return`<section class="quiz">${A.pv?`<div class="pvwarn" role="alert"><span style="font-size:22px" aria-hidden="true">⚠</span><span style="flex:1;min-width:200px"><b>Admin view: these answers are NOT saved</b><span class="small">Nothing in this session counts in your progress, statistics or wrong bank. To study for real, switch to Student view.</span></span><button class="btn sm" data-ad="viewSet" data-k="student">Switch to Student view</button></div>`:''}${top}
     <div class="qmeta"><span class="seen" title="${seenN===1?'First time this question has come up for you':`This question has come up ${seenN} times for you`}" aria-label="Seen ${seenN} time${seenN===1?'':'s'}">${seenN}</span><span class="pill acc">${esc(bk?.name||'')}</span><span>${esc(bk?.topics[q.t]||'')}</span>${(q.sub||[]).filter(t=>t!=='Other').map(t=>`<span class="pill">${esc(t)}</span>`).join('')}${q.num?`<span class="num">Q${esc(q.num)}</span>`:''}${q.p?`<span class="num">p.${q.p}</span>`:''}${multi?`<span class="pill warn">Choose ${q.a.length}</span>`:''}${q.k==='tf'?'<span class="pill">True / False</span>':''}${lateTag(A,qid,rec)}${Focus.saveBtn(q)}${repBtn(q)}</div>
     ${caseHTML(q)}<div class="stem">${esc(q.s)}</div>${figHTML(q)}
     <div class="opts">${opts}</div>
