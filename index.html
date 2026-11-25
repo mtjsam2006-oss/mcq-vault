@@ -2117,6 +2117,8 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Your session ({} of {} answered) is finished and saved in Statistics › Sessions.":"انتهت جلستك ({1} من {2} مُجاب) وحُفظت في الإحصاءات › الجلسات.",
+"The session could not be saved just now. Press Finish again.":"تعذّر حفظ الجلسة الآن. اضغط إنهاء مرة أخرى.",
 "Chosen:":"اخترت:",
 "Tap your specialty below, then press the button.":"اضغط على تخصصك في الأسفل، ثم اضغط الزر.",
 "Applying…":"جارٍ التطبيق…",
@@ -4613,6 +4615,7 @@ function tabMore(){const depN=isAdm()&&!stuView()?depBooks().filter(depReady).le
 function render(){
   if(S.dead){deadPaint();return}
   if(isExam(S.active)&&!S.active.pv&&S.view!=='quiz')S.view='quiz';
+  if(S.view!=='quiz'&&sessDone(S.active))setTimeout(finishQuiet,0); // left the questions with every one answered: the session is over
   if(!isAdm()&&(S.view==='depository'||S.view==='admin'))S.view='study';gateCheck();bellPaint();try{streakPaint()}catch(e){}Promise.resolve().then(()=>{try{tipPaint()}catch(e){}});
   const y0=scrollY;renderTabs();const m=$('#main');
   const v=S.view;document.body.classList.toggle('inquiz',v==='quiz');quizClock();
@@ -4720,7 +4723,7 @@ function viewStudy(){
   const A=S.active;
   return`
   <div class="stack" style="gap:4px"><h1>Study</h1><p class="muted">${nf(total)} questions across ${libBooks().length} book${libBooks().length===1?'':'s'}</p></div>
-  ${A?`<div class="hcard resumetop"><button class="resume" data-a="resume" style="background:none;border:0;padding:0">
+  ${A&&!sessDone(A)?`<div class="hcard resumetop"><button class="resume" data-a="resume" style="background:none;border:0;padding:0">
         <svg width="44" height="44" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="17" fill="none" stroke="var(--surface-2)" stroke-width="6"/><circle cx="22" cy="22" r="17" fill="none" stroke="var(--info)" stroke-width="6" stroke-linecap="round" stroke-dasharray="${(107*(A.idx/A.qids.length)).toFixed(1)} 107" transform="rotate(-90 22 22)"/></svg>
         <span style="flex:1;display:flex;flex-direction:column;gap:2px"><b>Continue your session</b><span class="small muted">Question ${A.idx+1} of ${A.qids.length} · ${Object.keys(A.ans).length} answered${A.endsAt?` · ${fmtClock(A.endsAt-now())} left`:''}</span></span>${ICON_PLAY}</button>
         <button class="btn sm ghost" data-a="abandon" style="align-self:flex-start">End this session</button></div>`:''}
@@ -5050,9 +5053,15 @@ async function nextQ(){
   if(A.idx+1>=A.qids.length){await finishSession('complete');return}
   A.idx++;A.sel=[];A.revealed=false;A.rv=null;A.qShownAt=now();delete A.pausedAt;await saveActive(A);render();scrollTo(0,0);
 }
+// every question answered and nothing more to come: the session is complete (it ends even if Finish was never pressed)
+function sessDone(A){return!!(A&&!A.pv&&!isExam(A)&&!A._fin&&A.qids&&A.qids.length&&!(A.cfg&&A.cfg.want>A.qids.length)&&A.qids.every(id=>A.ans[id]))}
+async function finishQuiet(){const A=S.active;if(!sessDone(A))return;A._fin=1;
+  try{await saveSessionMeta('complete')}catch(e){A._fin=0;console.warn('finish',e);return}
+  if(S.active===A){S.active=null;try{await IDB.del('kv','active')}catch(e){}}endActive(A);flush();
+  toast(`Your session (${nf(A.qids.length)} of ${nf(A.qids.length)} answered) is finished and saved in Statistics \u203a Sessions.`,6000);softRender()}
 async function finishSession(why){
   const A=S.active;if(!A||A._fin)return;A._fin=1;stopTicker();
-  await saveSessionMeta(why);S.summary={...A,endedAt:now(),why};S.active=null;await IDB.del('kv','active');endActive(A);flush();go('summary');
+  try{await saveSessionMeta(why)}catch(e){A._fin=0;console.warn('finish',e);toast('The session could not be saved just now. Press Finish again.',6000);return}S.summary={...A,endedAt:now(),why};S.active=null;await IDB.del('kv','active');endActive(A);flush();go('summary');
 }
 function viewSummary(){
   const A=S.summary;if(!A)return viewStudy();if(isExam(A))return examSummary(A);
