@@ -422,7 +422,7 @@ body.role-user [data-a="delBook"],body.role-user [data-a="depBack"],body.role-us
 <header class="top">
   <div class="top-in">
     <div class="brandrow">
-      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span><span class="brandname">MCQ Vault</span><span class="appver" id="appver" title="App version on this device">v3.3</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
+      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span><span class="brandname">MCQ Vault</span><span class="appver" id="appver" title="App version on this device">v3.4</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
       <div class="right"><button class="accbtn" id="accbtn" data-a="nav" data-v="settings" hidden></button><button class="sync" id="sync" data-a="nav" data-v="settings" title="Sync status"><span class="dot"></span><span id="synctxt">Starting…</span></button>
       <button class="themebtn bellbtn" id="bellbtn" data-ad="bell" aria-label="Notifications" title="Notifications" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.300 21a1.940 1.940 0 0 0 3.400 0"/></svg><span class="belln" hidden></span></button>
       <button class="themebtn langbtn" id="langbtn" data-a="lang" title="العربية" aria-label="التبديل إلى العربية" data-notr>ع</button>
@@ -2121,6 +2121,13 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Found by the checker":"وجده المدقق",
+"Apply":"تطبيق",
+"The checker compared these questions with the book and prepared a fix. Nothing changes until you approve. Open a question to see it after the edit, then Apply one, or Apply all in a group. Every fix can be undone.":"قارن المدقق هذه الأسئلة بالكتاب وجهّز إصلاحًا. لا يتغير شيء حتى توافق. افتح السؤال لترى شكله بعد التعديل، ثم طبّق واحدًا، أو طبّق الكل في المجموعة. يمكن التراجع عن كل إصلاح.",
+"Apply all {}":"تطبيق الكل {1}",
+"Applying {} of {}…":"جارٍ التطبيق {1} من {2}…",
+"{} applied. Each one can be undone.":"طُبّق {1}. يمكن التراجع عن كل واحد.",
+"{} applied. {} could not be applied: open them to see why.":"طُبّق {1}. تعذّر تطبيق {2}: افتحها لترى السبب.",
 "Admin view: these answers are NOT saved":"وضع المشرف: هذه الإجابات لا تُحفظ",
 "Nothing in this session counts in your progress, statistics or wrong bank. To study for real, switch to Student view.":"لا شيء في هذه الجلسة يُحسب في تقدمك أو إحصاءاتك أو بنك الأخطاء. للدراسة الفعلية، انتقل إلى وضع الطالب.",
 "Switch to Student view":"انتقل إلى وضع الطالب",
@@ -3431,7 +3438,7 @@ function adoptActive_(w,boot){
 }
 
 // every device shows its version; when the server has a newer one, say so and offer a reload
-const APP_VER=51;
+const APP_VER=52;
 async function verCheck(){if(Cloud.mode!=='gas'||!S.on)return;meLoad();try{const v=await gas('api_ver');if(v&&v.nt&&v.nt>(NOTES.nt||0))notesLoad();if(v&&v.ver>APP_VER){const el=$('#newver');el.innerHTML=`<span>A newer version (v${verName(v.ver)}) is available. This device has v${verName(APP_VER)}.</span><a href="${Cloud.via==='api'?'./':esc(v.url||'')}" target="${Cloud.via==='api'?'_self':'_top'}">Reload now</a>${v.apk&&/^https:[^\s"<>]+$/.test(v.apk)?` <a href="${esc(v.apk)}" target="_blank" rel="noopener">Download the new app</a>`:''}`;el.hidden=false}}catch(e){}}
 
 /*ACCOUNTS-START*/
@@ -4074,17 +4081,21 @@ const Admin=(()=>{
       ${ai.e?`<br><span>New explanation:</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.e)}</span>`:''}
       ${ai.src?`<br><span class="muted small">Source in the book:</span> <span class="small" data-notr>${esc(ai.src)}</span>`:''}
       ${ai.reply?`<br><span class="muted small">Suggested reply:</span> <span class="small" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.reply)}</span>`:''}
-      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">Apply changes and send reply</button>${r.fq&&r.fq.s?`<button class="btn sm" data-ad="admRepPrev" data-k="${esc(r.id)}">See the question after the edit</button>`:''}`:''}${ai.verdict!=='fix'&&ai.reply?`<button class="btn sm pri" data-ad="admRepOk" data-k="${esc(r.id)}">Approve: send this reply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button></div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm pri" data-ad="admRepView" data-k="${esc(r.id)}">See the edited question</button><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
-  function vRep(){const L=A.reps||[],op=L.filter(r=>r.st!=='done'),dn=L.filter(r=>r.st==='done').slice(0,40);
-    const card=r=>`<div class="nitem" data-rep="${esc(r.id)}"><div class="spread"><span><span class="pill ${r.k==='issue'?'acc':'bad'}">${REP_K[r.k]||'Issue'}</span> <b data-notr>${esc(r.n||r.u)}</b> <span class="muted small" data-notr>(${esc(r.u)})</span></span><span class="muted small">${fmtDate(r.at)}</span></div>
+      ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">${r.k==='chk'?'Apply':'Apply changes and send reply'}</button>${r.fq&&r.fq.s?`<button class="btn sm" data-ad="admRepPrev" data-k="${esc(r.id)}">See the question after the edit</button>`:''}`:''}${ai.verdict!=='fix'&&ai.reply?`<button class="btn sm pri" data-ad="admRepOk" data-k="${esc(r.id)}">Approve: send this reply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}${r.k==='chk'?'':`<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button>`}</div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm pri" data-ad="admRepView" data-k="${esc(r.id)}">See the edited question</button><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
+  function vRep(){const L=A.reps||[],op=L.filter(r=>r.st!=='done'&&r.k!=='chk'),ck=L.filter(r=>r.st!=='done'&&r.k==='chk'),dn=L.filter(r=>r.st==='done').slice(0,40);
+    const G=new Map();for(const r of ck){const g=r.g||'Checker';if(!G.has(g))G.set(g,[]);G.get(g).push(r)}
+    const card=r=>`<div class="nitem" data-rep="${esc(r.id)}"><div class="spread"><span><span class="pill ${r.k==='issue'?'acc':r.k==='chk'?'warn':'bad'}">${REP_K[r.k]||'Issue'}</span> ${r.k==='chk'?'':`<b data-notr>${esc(r.n||r.u)}</b> <span class="muted small" data-notr>(${esc(r.u)})</span>`}</span><span class="muted small">${fmtDate(r.at)}</span></div>
       ${repFull(r)}
       ${r.m?`<p data-notr style="white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0 0">${esc(r.m)}</p>`:''}
       ${r.re?`<div class="notice info" style="margin-top:6px"><b>Reply</b> <span class="muted small" data-notr>${esc(r.re.by||'')} · ${fmtDate(r.re.at)}</span><br><span data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(r.re.m)}</span></div>`:''}
       ${repAi(r)}
-      ${r.st!=='done'?`<label class="field" style="margin-top:6px"><span>Your reply</span><textarea id="rr-${esc(r.id)}" rows="2" maxlength="1500"></textarea></label>
+      ${r.st!=='done'&&r.k==='chk'?`<div class="row"><button class="linkbtn" data-ad="admRepDel" data-k="${esc(r.id)}">Delete</button></div>`:r.st!=='done'?`<label class="field" style="margin-top:6px"><span>Your reply</span><textarea id="rr-${esc(r.id)}" rows="2" maxlength="1500"></textarea></label>
         <div class="row">${r.q&&M.Q.has(r.q.id)?`<button class="btn sm" data-a="editQ" data-id="${esc(r.q.id)}">Edit question</button>`:''}<button class="btn sm pri" data-ad="admRepSend" data-k="${esc(r.id)}">${r.ai&&r.ai.verdict==='fix'&&r.q?'Reply only, without changes':'Send reply and close'}</button><button class="btn sm" data-ad="admRepClose" data-k="${esc(r.id)}">Close without a reply</button><button class="linkbtn" data-ad="admRepDel" data-k="${esc(r.id)}">Delete</button></div>`
       :`<div class="row" style="margin-top:6px"><button class="linkbtn" data-ad="admRepOpen" data-k="${esc(r.id)}">Open again</button><button class="linkbtn" data-ad="admRepDel" data-k="${esc(r.id)}">Delete</button></div>`}</div>`;
-    return`<div class="panel"><div class="spread"><h3>Waiting for a reply</h3>${checkNowBtn()}</div><p class="small" style="max-width:76ch">Users send these from the Report button on a question and from Report an issue. They are told they will have a reply within 24 hours. Your reply shows under their bell. Every report is first read by the checker, which looks in the book and recommends a fix. Nothing changes until you approve it, and you can always fix the question by hand with Edit question.</p>
+    const ckP=ck.length?`<div class="panel" id="chkpanel"><h3>Found by the checker</h3><p class="small" style="max-width:76ch">The checker compared these questions with the book and prepared a fix. Nothing changes until you approve. Open a question to see it after the edit, then Apply one, or Apply all in a group. Every fix can be undone.</p>
+      ${[...G].map(([g,rs])=>`<details class="chkgrp" style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0"><summary><b data-notr>${esc(g)}</b> <span class="pill">${nf(rs.length)}</span> <span class="small muted" data-notr>${esc(rs[0].q?rs[0].q.bn:'')}</span></summary>
+        <div class="row" style="margin:8px 0"><button class="btn sm pri" data-ad="admRepAll" data-k="${esc(g)}">Apply all ${nf(rs.length)}</button></div><div class="nlist" style="max-height:none">${rs.map(card).join('')}</div></details>`).join('')}</div>`:'';
+    return ckP+`<div class="panel"><div class="spread"><h3>Waiting for a reply</h3>${checkNowBtn()}</div><p class="small" style="max-width:76ch">Users send these from the Report button on a question and from Report an issue. They are told they will have a reply within 24 hours. Your reply shows under their bell. Every report is first read by the checker, which looks in the book and recommends a fix. Nothing changes until you approve it, and you can always fix the question by hand with Edit question.</p>
       ${op.length?`<div class="nlist" style="max-height:none">${op.map(card).join('')}</div>`:`<p class="muted small">No reports are waiting.</p>`}</div>
     <div class="panel"><h3>Closed</h3>${dn.length?`<div class="nlist">${dn.map(card).join('')}</div>`:`<p class="muted small">Nothing closed yet.</p>`}</div>`}
   function vOver(){const L=users().filter(a=>!a.del),U=L.filter(a=>a.role==='user'),wk=now()-7*DAY;
@@ -4204,6 +4215,10 @@ const Admin=(()=>{
   async function act(k,d,el){
     try{
       if(k==='admWantF'){A.f='want';A.tab='users';render();return}
+      if(k==='admRepAll'){const ids=(A.reps||[]).filter(r=>r.k==='chk'&&r.st!=='done'&&(r.g||'Checker')===d.k).map(r=>r.id);if(!ids.length)return;const b=$(`[data-ad=admRepAll][data-k="${CSS.escape(d.k)}"]`);
+        let done=0,bad=0;try{for(let i=0;i<ids.length;i+=25){if(b){b.disabled=true;b.textContent=`Applying ${Math.min(i+25,ids.length)} of ${ids.length}…`}const res=await gas('adm_repBulk',{ids:ids.slice(i,i+25)});done+=res.n||0;
+          for(const o of res.list||[]){const j=(A.reps||[]).findIndex(x=>x.id===o.id);if(j>=0)A.reps[j]=o;if(o.st!=='done')bad++}}}finally{if(b)b.disabled=false}
+        toast(bad?`${done} applied. ${bad} could not be applied: open them to see why.`:`${done} applied. Each one can be undone.`,7000);render();repRefresh();return}
       if(k==='admErrReload'){A.errs=null;A.errErr='';render();return}
       if(k==='admErrClear'){await gas('adm_errs',{clear:1});A.errs=[];toast('The list is empty.');render();return}
       if(k==='admTab'){A.tab=d.k;closeModal();if(S.view!=='admin')go('admin');else render();return}
@@ -4275,7 +4290,7 @@ const Admin=(()=>{
   return{A,view,act,change,load,uTable,users,stOf,fOk}})();
 /* ================= reports: wrong answer, explanation, any issue ================= */
 const REP={mine:[],busy:false};
-const REP_K={ans:'Wrong answer',expl:'Missing or wrong explanation',q:'Problem in the question',issue:'Issue'};
+const REP_K={ans:'Wrong answer',expl:'Missing or wrong explanation',q:'Problem in the question',issue:'Issue',chk:'Found by the checker'};
 function repN(){return isAdm()&&ME?ME.rp||0:0}
 function repBtn(q){if(!q||!q.id||!ACC)return'';return`<button class="btn sm ghost repbtn" data-ad="repQ" data-id="${q.id}" title="Report a wrong answer, or a missing or wrong explanation">\u2691 Report</button>`}
 function repQInfo(id){const q=M.Q.get(id);if(!q)return null;const s=String(id),b=M.books.get(s.slice(0,s.lastIndexOf('.')));
