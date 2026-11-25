@@ -3364,7 +3364,8 @@ async function endActive(A){if(A.pv)return;S.doneSids=[...(S.doneSids||[]).filte
   S.activeOut={sid:A.sid,startedAt:A.startedAt,ended:true,upd:now()};await kvPut('activeOut',S.activeOut);clearTimeout(saveActive._t);syncActive()}
 async function syncActive(boot){
   if(!S.on||!C().activeGet)return;if(S.activeBusy){S.activeAgain=true;return}S.activeBusy=true;
-  try{do{S.activeAgain=false;if(S.activeOut&&!S.activeOut.ended&&sessClosed(S.activeOut)){S.activeOut=endedDoc(S.activeOut);kvPut('activeOut',S.activeOut)}const out=S.activeOut;
+  if(S.activeOut&&S.activeOut.pv){S.activeOut=null;IDB.del('kv','activeOut').catch(()=>{})} // an Admin view preview stays on this device
+  try{do{S.activeAgain=false;if(S.activeOut&&S.activeOut.pv){S.activeOut=null;IDB.del('kv','activeOut').catch(()=>{})}if(S.activeOut&&!S.activeOut.ended&&sessClosed(S.activeOut)){S.activeOut=endedDoc(S.activeOut);kvPut('activeOut',S.activeOut)}const out=S.activeOut;
       const w=out?await C().activePut(out):await C().activeGet();
       if(out&&S.activeOut===out){S.activeOut=null;IDB.del('kv','activeOut').catch(()=>{})}
       adoptActive(w,boot);boot=false}while(S.activeAgain)}
@@ -3374,10 +3375,19 @@ function adoptActive(w,boot){let left=false;
     if(!S.activeOut){S.activeOut=endedDoc(X);setTimeout(syncActive,50)}
     if(S.view==='quiz'){stopTicker();toast('That session was already finished, so it was closed here',5000);S.view='study';left=true}} // one screen change at the end, so Back stays in step
   if(w&&!w.ended&&sessClosed(w)){if(!S.activeOut){S.activeOut=endedDoc(w);setTimeout(syncActive,50)}w={...w,ended:true}}
-  adoptActive_(w,boot);if(left&&S.view==='study'){render();scrollTo(0,0)}}
+  adoptActive_(w,boot);if(S.pvFixed){const A=S.active;if(A&&A.sid===S.pvFixed&&!A.pv&&!S.activeOut){S.activeOut=activeDoc(A);setTimeout(syncActive,50)}S.pvFixed=null}
+  if(left&&S.view==='study'){render();scrollTo(0,0)}}
+// 25 Nov 2026: a preview copy that reached the cloud (older app versions sent it) becomes a real session here, with its answers saved
+function pvFix(w){w={...w};delete w.pv;const have=new Set(M.att.filter(r=>r.sid===w.sid).map(r=>r.q)),A=S.active;if(A&&A.sid===w.sid)delete A.pv;let n=0;
+  for(const q of Object.keys(w.ans||{}).sort((a,b)=>(w.ans[a].ts||0)-(w.ans[b].ts||0))){if(have.has(q)||(w.drop||[]).includes(q))continue;const x=w.ans[q];
+    if(!x||!x.ts)continue;recordAttempt({q,ch:x.ch,ok:!!x.ok,ms:x.ms||0,ts:x.ts,sid:w.sid,to:!!x.to});n++}
+  if(n)persistLog(curLogDoc());S.pvFixed=w.sid;return w}
 function adoptActive_(w,boot){
+  if(w&&w.pv)w=pvFix(w);if(w&&w.shelf&&w.shelf.some(x=>x&&x.pv))w={...w,shelf:w.shelf.map(x=>x&&x.pv?pvFix(x):x)};
+  if(S.active&&S.active.pv&&w&&w.sid===S.active.sid)delete S.active.pv; // the same session is real elsewhere: it is real here too
   const A=S.active,done=new Set(S.doneSids||[]);
   if(w&&w.shelf){S.shelf=w.shelf.filter(x=>!sessClosed(x));kvPut('shelf',S.shelf)}
+  if(A&&A.pv)return; // an Admin view preview on this device: the cloud is not touched
   // never drop an unfinished session the cloud has not kept: hand it over first, it is kept under "Other unfinished sessions"
   if(w&&A&&A.sid!==w.sid&&!A._submitting&&Object.keys(A.ans||{}).length&&!(w.shelf||[]).some(x=>x.sid===A.sid)){if(!S.activeOut){S.activeOut=activeDoc(A);setTimeout(syncActive,50)}return}
   if(w&&!w.ended&&done.has(w.sid)&&w.reopen){S.doneSids=S.doneSids.filter(s=>s!==w.sid);kvPut('doneSids',S.doneSids);done.delete(w.sid)}
@@ -3779,21 +3789,6 @@ async function errSend(){clearTimeout(ERR.t);if(!ERR.q.length)return;if(!ACC||!S
 addEventListener('error',e=>{if(!e||!e.message)return;errNote(e.message,String(e.filename||'').split('\x2f').pop()+':'+(e.lineno||0)+':'+(e.colno||0),e.error&&e.error.stack)});
 addEventListener('unhandledrejection',e=>{const r=e&&e.reason;try{if(r&&isNetErr(r))return}catch(x){}errNote(r&&r.message||String(r),'promise',r&&r.stack)});
 setTimeout(()=>{if(ERR.q.length)errSend()},15000);
-/* ----- temporary session check for the main account (25 Nov 2026) ----- */
-const SCHK={sent:{}};
-function schkS(x){if(!x)return null;const q=x.qids||[],a=x.ans||{},un=[];q.forEach((id,i)=>{if(!a[id]&&un.length<6)un.push(i+1)});const dr=new Set(x.drop||[]);
-  return{sid:x.sid,e:x.ended?1:0,n:q.length,i:(x.idx||0)+1,a:Object.keys(a).length,un,ro:x.reopen||0,up:x.upd||0,st:x.startedAt||0,fx:x.cfg&&x.cfg.fix||0,wt:x.cfg&&x.cfg.want||0,mo:x.cfg&&x.cfg.more||0,dr:dr.size,drq:q.filter(id=>dr.has(id)).length,sc:String(x.cfg&&(x.cfg.scopeText||x.cfg.style)||'').slice(0,40)}}
-function schkR(id){const s=M.sessions.get(id);return s?{d:s.done?1:0,w:s.why||'',up:s.upd||0,en:s.en||0,n:s.n,p:s.planned,dv:String(s.dev||'').slice(0,8)}:null}
-async function schk(why){try{if(!ACC||!ACC.own||!S.on)return;const A=S.active,sh=S.shelf||[];
-  let w=null;try{w=await C().activeGet()}catch(e){w={err:String(e&&e.message||e).slice(0,80)}}
-  const ids=new Set([A&&A.sid,w&&w.sid,...sh.map(x=>x.sid),...((w&&w.shelf)||[]).map(x=>x.sid)].filter(Boolean));if(!ids.size)return;
-  const key=why+[...ids].join();if(SCHK.sent[key])return;SCHK.sent[key]=1;
-  const o={why,v:APP_VER,now:Date.now(),dev:String(S.dev||'').slice(0,8),app:inApp()?1:0,view:S.view,loc:schkS(A),cl:w&&w.err?w:schkS(w),
-    clClosed:w&&w.closed?Object.fromEntries([...ids].map(k=>[k,w.closed[k]||0])):0,
-    shL:sh.map(schkS),shC:((w&&w.shelf)||[]).map(schkS),rec:Object.fromEntries([...ids].map(k=>[k,schkR(k)])),done:[...ids].filter(k=>(S.doneSids||[]).includes(k)),
-    out:S.activeOut?{sid:S.activeOut.sid,e:S.activeOut.ended?1:0,up:S.activeOut.upd||0}:0};
-  const s=JSON.stringify(o);for(let i=0,p=1;i<s.length&&p<=4;i+=1400,p++)await gas('rep_add',{k:'issue',m:`[session check ${p}/${Math.ceil(s.length/1400)}] `+s.slice(i,i+1400)})}catch(e){console.warn('schk',e)}}
-setTimeout(()=>schk('load'),25000);
 /* ----- free questions, then the activation code ----- */
 function trialUsed(){if(!ME||!ME.trial)return 0;return Math.max(ME.trial.used||0,(M.att?M.att.length:0)+(M.exAtt?M.exAtt.length:0))}
 function gateNeed(){if(isAdm()||!ME||!ME.trial||!ME.trial.on)return'';if(leaseBad())return'offline';if(ME.lock)return ME.lock;if(ME.act)return ME.sub&&ME.sub<Date.now()?'sub':'';return trialUsed()>=ME.trial.n?'trial':''}
@@ -5112,7 +5107,7 @@ async function finishQuiet(){const A=S.active;if(!sessDone(A))return;A._fin=1;
   toast(`Your session (${nf(A.qids.length)} of ${nf(A.qids.length)} answered) is finished and saved in Statistics \u203a Sessions.`,6000);softRender()}
 async function finishSession(why){
   const A=S.active;if(!A||A._fin)return;A._fin=1;stopTicker();
-  try{await saveSessionMeta(why)}catch(e){A._fin=0;console.warn('finish',e);toast('The session could not be saved just now. Press Finish again.',6000);return}S.summary={...A,endedAt:now(),why};S.active=null;setTimeout(()=>schk('after finish'),12000);await IDB.del('kv','active');endActive(A);flush();go('summary');
+  try{await saveSessionMeta(why)}catch(e){A._fin=0;console.warn('finish',e);toast('The session could not be saved just now. Press Finish again.',6000);return}S.summary={...A,endedAt:now(),why};S.active=null;await IDB.del('kv','active');endActive(A);flush();go('summary');
 }
 function viewSummary(){
   const A=S.summary;if(!A)return viewStudy();if(isExam(A))return examSummary(A);
