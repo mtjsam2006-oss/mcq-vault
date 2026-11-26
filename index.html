@@ -422,7 +422,7 @@ body.role-user [data-a="delBook"],body.role-user [data-a="depBack"],body.role-us
 <header class="top">
   <div class="top-in">
     <div class="brandrow">
-      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span><span class="brandname">MCQ Vault</span><span class="appver" id="appver" title="App version on this device">v3.4</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
+      <div class="brand"><button class="backbtn" id="backbtn" data-a="back" aria-label="Back" title="Back" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg></button><span class="mark bulb mvmark"><svg viewBox="0 0 512 512" width="28" height="28" aria-hidden="true"><rect width="512" height="512" rx="120" fill="#141821"/><rect x="34" y="34" width="444" height="444" rx="94" fill="none" stroke="#F2B544" stroke-width="14"/><rect x="58" y="58" width="396" height="396" rx="72" fill="none" stroke="#F2B544" stroke-width="4" opacity=".8"/><g transform="translate(62 80) scale(.74)" fill="none" stroke="#F2B544" stroke-width="40" stroke-linecap="round" stroke-linejoin="round"><path d="M96 352V176l78 110 78-110v176"/><path d="M304 184l54 168 100-212"/></g></svg></span><span class="brandname">MCQ Vault</span><span class="appver" id="appver" title="App version on this device">v3.5</span><span class="pill bad testtag" id="testtag" hidden>TEST COPY</span></div>
       <div class="right"><button class="accbtn" id="accbtn" data-a="nav" data-v="settings" hidden></button><button class="sync" id="sync" data-a="nav" data-v="settings" title="Sync status"><span class="dot"></span><span id="synctxt">Starting…</span></button>
       <button class="themebtn bellbtn" id="bellbtn" data-ad="bell" aria-label="Notifications" title="Notifications" hidden><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.300 21a1.940 1.940 0 0 0 3.400 0"/></svg><span class="belln" hidden></span></button>
       <button class="themebtn langbtn" id="langbtn" data-a="lang" title="العربية" aria-label="التبديل إلى العربية" data-notr>ع</button>
@@ -2121,6 +2121,22 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Scanned book":"كتاب ممسوح",
+"Scanned: waiting for the checker":"ممسوح: بانتظار المدقق",
+"Scanned books read by the checker":"كتب ممسوحة قرأها المدقق",
+"Google read the page pictures and the checker matched each question with the answer printed in the book. Nothing is added until you approve. Then the questions go into the book in the Depository.":"قرأت Google صور الصفحات وطابق المدقق كل سؤال مع الإجابة المطبوعة في الكتاب. لا يُضاف شيء حتى توافق. بعدها تدخل الأسئلة إلى الكتاب في المستودع.",
+"{} questions read":"{1} سؤالًا مقروءًا",
+"Approve: add the questions":"موافقة: أضف الأسئلة",
+"Adding the questions…":"جارٍ إضافة الأسئلة…",
+"{} questions are now in the book in the Depository.":"أصبح {1} سؤالًا في الكتاب داخل المستودع.",
+"Scanned book: it goes to the Depository, Google reads the page pictures, and the checker prepares the questions for your approval in Reports.":"كتاب ممسوح: يذهب إلى المستودع، وتقرأ Google صور الصفحات، ثم يجهّز المدقق الأسئلة لموافقتك في البلاغات.",
+"Sending the page pictures of “{}”: {} of {}. Keep the app open until this finishes.":"جارٍ إرسال صور صفحات “{1}”: {2} من {3}. أبقِ التطبيق مفتوحًا حتى ينتهي.",
+"A scanned book. Google is reading its {} page pictures; then the checker matches each question with the answer printed in the book. You approve the result in Admin, Reports, and the questions appear here.":"كتاب ممسوح. تقرأ Google صور صفحاته الـ{1}؛ ثم يطابق المدقق كل سؤال مع الإجابة المطبوعة في الكتاب. توافق على النتيجة في الإدارة، البلاغات، فتظهر الأسئلة هنا.",
+"All {} page pictures of “{}” were sent. Google reads them now; the checker then prepares the questions for your approval in Reports.":"أُرسلت كل صور الصفحات ({1}) لكتاب “{2}”. تقرؤها Google الآن؛ ثم يجهّز المدقق الأسئلة لموافقتك في البلاغات.",
+"Scanned book: Google is reading the pages…":"كتاب ممسوح: تقرأ Google الصفحات…",
+"Scanned book: Google is reading page {} of {}":"كتاب ممسوح: تقرأ Google الصفحة {1} من {2}",
+"Scanned book: Google read {} page{}. Check the questions as usual.":"كتاب ممسوح: قرأت Google {1} صفحة. راجع الأسئلة كالمعتاد.",
+"Could not send all page pictures: {}. Import the PDF into the same book again to finish.":"تعذّر إرسال كل صور الصفحات: {1}. استورد ملف PDF في الكتاب نفسه مرة أخرى لإكمال الإرسال.",
 "Found by the checker":"وجده المدقق",
 "Apply":"تطبيق",
 "The checker compared these questions with the book and prepared a fix. Nothing changes until you approve. Open a question to see it after the edit, then Apply one, or Apply all in a group. Every fix can be undone.":"قارن المدقق هذه الأسئلة بالكتاب وجهّز إصلاحًا. لا يتغير شيء حتى توافق. افتح السؤال لترى شكله بعد التعديل، ثم طبّق واحدًا، أو طبّق الكل في المجموعة. يمكن التراجع عن كل إصلاح.",
@@ -3438,7 +3454,7 @@ function adoptActive_(w,boot){
 }
 
 // every device shows its version; when the server has a newer one, say so and offer a reload
-const APP_VER=52;
+const APP_VER=53;
 async function verCheck(){if(Cloud.mode!=='gas'||!S.on)return;meLoad();try{const v=await gas('api_ver');if(v&&v.nt&&v.nt>(NOTES.nt||0))notesLoad();if(v&&v.ver>APP_VER){const el=$('#newver');el.innerHTML=`<span>A newer version (v${verName(v.ver)}) is available. This device has v${verName(APP_VER)}.</span><a href="${Cloud.via==='api'?'./':esc(v.url||'')}" target="${Cloud.via==='api'?'_self':'_top'}">Reload now</a>${v.apk&&/^https:[^\s"<>]+$/.test(v.apk)?` <a href="${esc(v.apk)}" target="_blank" rel="noopener">Download the new app</a>`:''}`;el.hidden=false}}catch(e){}}
 
 /*ACCOUNTS-START*/
@@ -4082,7 +4098,7 @@ const Admin=(()=>{
       ${ai.src?`<br><span class="muted small">Source in the book:</span> <span class="small" data-notr>${esc(ai.src)}</span>`:''}
       ${ai.reply?`<br><span class="muted small">Suggested reply:</span> <span class="small" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere">${esc(ai.reply)}</span>`:''}
       ${r.st!=='done'?`<div class="row" style="margin-top:6px">${ai.verdict==='fix'&&r.q?`<button class="btn sm pri" data-ad="admRepApply" data-k="${esc(r.id)}">${r.k==='chk'?'Apply':'Apply changes and send reply'}</button>${r.fq&&r.fq.s?`<button class="btn sm" data-ad="admRepPrev" data-k="${esc(r.id)}">See the question after the edit</button>`:''}`:''}${ai.verdict!=='fix'&&ai.reply?`<button class="btn sm pri" data-ad="admRepOk" data-k="${esc(r.id)}">Approve: send this reply</button>`:''}${ai.reply?`<button class="btn sm" data-ad="admRepUse" data-k="${esc(r.id)}">Use this reply</button>`:''}${r.k==='chk'?'':`<button class="linkbtn" data-ad="admRepRecheck" data-k="${esc(r.id)}">Ask the checker again</button>`}</div>`:''}${r.st==='done'&&r.applied&&r.prev?`<div class="row" style="margin-top:6px"><button class="btn sm pri" data-ad="admRepView" data-k="${esc(r.id)}">See the edited question</button><button class="btn sm" data-ad="admRepUndo" data-k="${esc(r.id)}">Undo this fix</button></div>`:''}</div>`}
-  function vRep(){const L=A.reps||[],op=L.filter(r=>r.st!=='done'&&r.k!=='chk'),ck=L.filter(r=>r.st!=='done'&&r.k==='chk'),dn=L.filter(r=>r.st==='done').slice(0,40);
+  function vRep(){const L=A.reps||[],op=L.filter(r=>r.st!=='done'&&r.k!=='chk'&&r.k!=='ocr'),oc=L.filter(r=>r.st!=='done'&&r.k==='ocr'),ck=L.filter(r=>r.st!=='done'&&r.k==='chk'),dn=L.filter(r=>r.st==='done'&&r.k!=='ocr').slice(0,40);
     const G=new Map();for(const r of ck){const g=r.g||'Checker';if(!G.has(g))G.set(g,[]);G.get(g).push(r)}
     const card=r=>`<div class="nitem" data-rep="${esc(r.id)}"><div class="spread"><span><span class="pill ${r.k==='issue'?'acc':r.k==='chk'?'warn':'bad'}">${REP_K[r.k]||'Issue'}</span> ${r.k==='chk'?'':`<b data-notr>${esc(r.n||r.u)}</b> <span class="muted small" data-notr>(${esc(r.u)})</span>`}</span><span class="muted small">${fmtDate(r.at)}</span></div>
       ${repFull(r)}
@@ -4095,7 +4111,13 @@ const Admin=(()=>{
     const ckP=ck.length?`<div class="panel" id="chkpanel"><h3>Found by the checker</h3><p class="small" style="max-width:76ch">The checker compared these questions with the book and prepared a fix. Nothing changes until you approve. Open a question to see it after the edit, then Apply one, or Apply all in a group. Every fix can be undone.</p>
       ${[...G].map(([g,rs])=>`<details class="chkgrp" style="border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:8px 0"><summary><b data-notr>${esc(g)}</b> <span class="pill">${nf(rs.length)}</span> <span class="small muted" data-notr>${esc(rs[0].q?rs[0].q.bn:'')}</span></summary>
         <div class="row" style="margin:8px 0"><button class="btn sm pri" data-ad="admRepAll" data-k="${esc(g)}">Apply all ${nf(rs.length)}</button></div><div class="nlist" style="max-height:none">${rs.map(card).join('')}</div></details>`).join('')}</div>`:'';
-    return ckP+`<div class="panel"><div class="spread"><h3>Waiting for a reply</h3>${checkNowBtn()}</div><p class="small" style="max-width:76ch">Users send these from the Report button on a question and from Report an issue. They are told they will have a reply within 24 hours. Your reply shows under their bell. Every report is first read by the checker, which looks in the book and recommends a fix. Nothing changes until you approve it, and you can always fix the question by hand with Edit question.</p>
+    const ocP=oc.length?`<div class="panel" id="ocrpanel"><h3>Scanned books read by the checker</h3><p class="small" style="max-width:76ch">Google read the page pictures and the checker matched each question with the answer printed in the book. Nothing is added until you approve. Then the questions go into the book in the Depository.</p>
+      ${oc.map(r=>`<div class="nitem" data-rep="${esc(r.id)}"><div class="spread"><b data-notr style="overflow-wrap:anywhere">${esc(r.q?r.q.bn:'')}</b><span class="muted small">${fmtDate(r.at)}</span></div>
+        ${r.ocr&&r.ocr.n?`<p style="margin:4px 0"><b>${nf(r.ocr.n)}</b> questions read</p>`:''}${r.ocr&&r.ocr.sum?`<p class="small" data-notr style="white-space:pre-wrap;overflow-wrap:anywhere;margin:4px 0">${esc(r.ocr.sum)}</p>`:''}
+        ${r.ocr&&(r.ocr.notes||[]).length?`<ul class="small" style="margin:4px 0 6px 18px">${r.ocr.notes.map(t=>`<li data-notr>${esc(t)}</li>`).join('')}</ul>`:''}
+        ${r.ocr&&r.ocr.err?`<div class="notice bad" data-notr>${esc(r.ocr.err)}</div>`:''}
+        <div class="row"><button class="btn sm pri" data-ad="admRepOcr" data-k="${esc(r.id)}">Approve: add the questions</button> <button class="linkbtn" data-ad="admRepDel" data-k="${esc(r.id)}">Delete</button></div></div>`).join('')}</div>`:'';
+    return ocP+ckP+`<div class="panel"><div class="spread"><h3>Waiting for a reply</h3>${checkNowBtn()}</div><p class="small" style="max-width:76ch">Users send these from the Report button on a question and from Report an issue. They are told they will have a reply within 24 hours. Your reply shows under their bell. Every report is first read by the checker, which looks in the book and recommends a fix. Nothing changes until you approve it, and you can always fix the question by hand with Edit question.</p>
       ${op.length?`<div class="nlist" style="max-height:none">${op.map(card).join('')}</div>`:`<p class="muted small">No reports are waiting.</p>`}</div>
     <div class="panel"><h3>Closed</h3>${dn.length?`<div class="nlist">${dn.map(card).join('')}</div>`:`<p class="muted small">Nothing closed yet.</p>`}</div>`}
   function vOver(){const L=users().filter(a=>!a.del),U=L.filter(a=>a.role==='user'),wk=now()-7*DAY;
@@ -4219,6 +4241,9 @@ const Admin=(()=>{
         let done=0,bad=0;try{for(let i=0;i<ids.length;i+=25){if(b){b.disabled=true;b.textContent=`Applying ${Math.min(i+25,ids.length)} of ${ids.length}…`}const res=await gas('adm_repBulk',{ids:ids.slice(i,i+25)});done+=res.n||0;
           for(const o of res.list||[]){const j=(A.reps||[]).findIndex(x=>x.id===o.id);if(j>=0)A.reps[j]=o;if(o.st!=='done')bad++}}}finally{if(b)b.disabled=false}
         toast(bad?`${done} applied. ${bad} could not be applied: open them to see why.`:`${done} applied. Each one can be undone.`,7000);render();repRefresh();return}
+      if(k==='admRepOcr'){const b=$(`[data-ad=admRepOcr][data-k="${CSS.escape(d.k)}"]`);if(b){b.disabled=true;b.textContent='Adding the questions…'}
+        try{const res=await gas('adm_repOcr',{id:d.k});const j=(A.reps||[]).findIndex(x=>x.id===d.k);if(j>=0&&res.r)A.reps[j]=res.r;toast(`${nf(res.saved||0)} questions are now in the book in the Depository.`,9000);pull().catch(()=>{})}
+        catch(e){const j=(A.reps||[]).findIndex(x=>x.id===d.k);if(j>=0){A.reps[j]={...A.reps[j],ocr:{...(A.reps[j].ocr||{}),err:e.message||String(e)}}}toast(e.message||String(e),9000)}finally{if(b)b.disabled=false}render();repRefresh();return}
       if(k==='admErrReload'){A.errs=null;A.errErr='';render();return}
       if(k==='admErrClear'){await gas('adm_errs',{clear:1});A.errs=[];toast('The list is empty.');render();return}
       if(k==='admTab'){A.tab=d.k;closeModal();if(S.view!=='admin')go('admin');else render();return}
@@ -4290,7 +4315,7 @@ const Admin=(()=>{
   return{A,view,act,change,load,uTable,users,stOf,fOk}})();
 /* ================= reports: wrong answer, explanation, any issue ================= */
 const REP={mine:[],busy:false};
-const REP_K={ans:'Wrong answer',expl:'Missing or wrong explanation',q:'Problem in the question',issue:'Issue',chk:'Found by the checker'};
+const REP_K={ans:'Wrong answer',expl:'Missing or wrong explanation',q:'Problem in the question',issue:'Issue',chk:'Found by the checker',ocr:'Scanned book'};
 function repN(){return isAdm()&&ME?ME.rp||0:0}
 function repBtn(q){if(!q||!q.id||!ACC)return'';return`<button class="btn sm ghost repbtn" data-ad="repQ" data-id="${q.id}" title="Report a wrong answer, or a missing or wrong explanation">\u2691 Report</button>`}
 function repQInfo(id){const q=M.Q.get(id);if(!q)return null;const s=String(id),b=M.books.get(s.slice(0,s.lastIndexOf('.')));
@@ -6740,6 +6765,11 @@ async function impRead(){
     I.kind=r.kind||summarizeKind({},/\.docx$/i.test(f.name)?'docx':'txt');I.cover=r.cover||null;
   }catch(e){console.error(e);I.step='pick';render();toast('Could not read the file: '+(e.message||e));if(I.batch){(S.impBatch=S.impBatch||[]).push({n:I.name,skip:'skipped: the file could not be read'});return impNext(I)}return}
   S.lastFile={file:f,bookId:I.bookId};
+  if(I.kind?.k==='scan'&&isAdm()&&Cloud.mode==='gas'&&S.on&&/\.pdf$/i.test(f.name)){I.step='reading';I.prog=0;I.progMax=I.pages.length;I.msg='Scanned book: Google is reading the pages…';render();
+    try{await ocrRead(I,f)}catch(e){console.warn('ocrRead',e);I.ocrFail=e.message||String(e)}
+    if(!I.ocrFail)toast(`Scanned book: Google read ${I.pages.length} page${I.pages.length===1?'':'s'}. Check the questions as usual.`,7000)}
+  if(I.kind?.k==='scan'&&I.ocrFail){I.ocr=1;I.result=Reader.parse(I.pages,{defaultTopic:I.defaultTopic});I.excluded=new Set();I.step='review';I.revPage=0;render();
+    toast('Scanned book: it goes to the Depository, Google reads the page pictures, and the checker prepares the questions for your approval in Reports.',9000);return impDep()}
   if(I.kind?.k==='scan'){I.step='pick';render();toast('This PDF has no text to read. Run it through OCR first, then import the OCR version.',8000);if(I.batch){(S.impBatch=S.impBatch||[]).push({n:I.name,skip:'skipped: no text to read (needs OCR)'});return impNext(I)}return}
   if(I.method==='ai'){await aiExtract()}else{I.step='parsing';I.msg='Finding questions…';render();await sleep(30);
     try{I.result=Reader.parse(I.pages,{heading:I.heading||undefined,defaultTopic:I.defaultTopic})}catch(e){console.error(e);toast('Extraction failed: '+e.message);I.step='pick';render();return}
@@ -7005,9 +7035,33 @@ async function depSend(I,bookId,o={}){
       pages:I.pages.map(p=>p.xs?{p:p.p,lines:p.lines,ys:p.ys,xs:p.xs}:{p:p.p,lines:p.lines,ys:p.ys})});const gz=await gzB64(s).catch(()=>null);pg={name:`pages-${I.from}-${I.to}`,gz:!!gz,data:gz||s}}
     const r=await gas('api_depReport',depMeta(M.books.get(bookId)||b),issueReport(I,null,{full:true}),pg);
     I.depSent=r&&r.url||'#';I.depErr=null;
+    if(I.ocr&&!o.noPages&&!I.ocrSent){I.ocrSent=1;ocrSend(I,bookId).catch(e=>{console.warn('ocrSend',e);S.ocrSend=null;toast('Could not send all page pictures: '+(e.message||e)+'. Import the PDF into the same book again to finish.',10000);softRender()})}
     const b2=M.books.get(bookId);if(b2&&b2.dep&&!o.noSave){const b3=clone(b2);b3.dep={...b3.dep,sent:now(),text:1};b3.updatedAt=now();await saveBook(b3)}
   }catch(e){console.warn('depSend',e);I.depErr=e.message||e.code||'error'}
   if(S.view==='import'||S.view==='depository')softRender()}
+async function ocrJpeg(doc,p){const page=await doc.getPage(p);const base=page.getViewport({scale:1});const vp=page.getViewport({scale:Math.max(1,Math.min(3,1700/base.width))});
+  const cv=document.createElement('canvas');cv.width=Math.ceil(vp.width);cv.height=Math.ceil(vp.height);const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+  await page.render({canvasContext:ctx,viewport:vp}).promise;const data=cv.toDataURL('image/jpeg',0.82).split(',')[1];page.cleanup();cv.width=cv.height=1;return data}
+// a scanned PDF: Google Drive's free OCR reads every page on the server (nothing is stored); the pages get that text
+async function ocrRead(I,f){const lib=await loadPdf();const doc=await lib.getDocument({data:await f.arrayBuffer(),isEvalSupported:false}).promise;
+  const n=I.pages.length,out=new Array(n);let next=0,done=0;
+  const work=async()=>{while(next<n){const k=next++;const p=I.pages[k].p;const data=await ocrJpeg(doc,p);let r=null;
+      for(let t=0;;t++){try{r=await gas('adm_ocrRead',{data});break}catch(e){if(t>=2)throw e;await sleep(4000*(t+1))}}
+      const lines=String(r&&r.text||'').replace(/^\uFEFF/,'').replace(/^_{6,}\s*/,'').split(/\r?\n/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
+      out[k]={p,lines,ys:lines.map((_,i)=>40+i*14)};done++;I.prog=done;I.msg=`Scanned book: Google is reading page ${done} of ${n}`;if(S.view==='import'&&I.step==='reading')render()}};
+  await Promise.all(Array.from({length:Math.min(window.OCR_PAR||3,n)},work));try{doc.destroy()}catch(e){}
+  const chars=out.reduce((s,pg)=>s+pg.lines.join(' ').length,0);if(chars<40*n)throw new Error('Google found almost no text on these pages');
+  I.pages=out;I.chars=chars;I.kind={...I.kind,k:'ocr',ocr:(I.kind.scan||0)+(I.kind.ocr||0),scan:0,google:1};I.ocrRead=1}
+async function ocrSend(I,bookId){const b=M.books.get(bookId);const lib=await loadPdf();const doc=await lib.getDocument({data:await I.file.arrayBuffer(),isEvalSupported:false}).promise;
+  const ps=I.pages.map(p=>p.p),n=ps.length;S.ocrSend={id:bookId,name:b?b.name:I.name,k:0,n};softRender();
+  for(let k=0;k<n;k++){const p=ps[k];S.ocrSend.k=k+1;if(S.view==='depository'||S.view==='import')softRender();
+    const page=await doc.getPage(p);const base=page.getViewport({scale:1});const vp=page.getViewport({scale:Math.max(1,Math.min(3,1700/base.width))});
+    const cv=document.createElement('canvas');cv.width=Math.ceil(vp.width);cv.height=Math.ceil(vp.height);const ctx=cv.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,cv.width,cv.height);
+    await page.render({canvasContext:ctx,viewport:vp}).promise;const data=cv.toDataURL('image/jpeg',0.82).split(',')[1];page.cleanup();cv.width=cv.height=1;
+    for(let t=0;;t++){try{await gas('adm_ocrPage',{bookId,name:b?b.name:I.name,file:I.fileName,p,from:I.from,to:I.to,total:I.total,first:k===0?1:0,last:k===n-1?1:0,data});break}catch(e){if(t>=2)throw e;await sleep(4000*(t+1))}}}
+  try{doc.destroy()}catch(e){}
+  const b2=M.books.get(bookId);if(b2&&b2.dep){const b3=clone(b2);b3.dep={...b3.dep,ocr:{n,at:now()}};b3.updatedAt=now();await saveBook(b3)}
+  S.ocrSend=null;toast(`All ${n} page pictures of “${b?b.name:I.name}” were sent. Google reads them now; the checker then prepares the questions for your approval in Reports.`,10000);softRender()}
 async function depStatus(b){if(Cloud.mode!=='gas'||!S.on)return;try{await gas('api_depReport',depMeta(b),null,null)}catch(e){console.warn('depStatus',e)}}
 async function depAdd(id,force,asked){const b=M.books.get(id);if(!b||!b.dep)return;
   if(!depReady(b)&&!force){modal(`<h2>Add “${esc(b.name)}” before it reads 100%?</h2><p>It reads ${depPct(b)} of its question pages${depMissed(b)?` and ${nf(depMissed(b))} question${depMissed(b)>1?'s':''} could not be read`:''}. Its ${nf(bookQs(id).length)} saved questions go into your sessions now; the rest stay missing until you re-import those pages.</p>
@@ -7071,7 +7125,8 @@ async function depApply(id,I){
   const lostN=(c.noAns||0)+(c.unv||0)+(c.missed||0),lostO=prev?(prev.noAns||0)+(prev.unv||0)+(prev.failed||0)+(prev.missed||0):Infinity;
   if(prev&&!Array.isArray(prev.lost)&&lostN===lostO){const L=lostList(I);const b3=clone(b);const r3=(b3.imports||[]).find(r=>r.id===prev.id);if(r3){r3.lost=L;b3.updatedAt=now();await saveBook(b3)}} // an older import: list its lost questions so they can be fixed by hand
   const rich=l=>l.reduce((s,q)=>s+((q.e||'').trim()?1:0)+(q.v?1:0),0),richer=add.length>=oldN&&rich(add)>rich(old.filter(q=>inR(q)&&!q.m));
-  if(prev&&!(ns.a<os.a||ns.a===os.a&&(lostN<lostO||lostN===lostO&&(add.length>oldN||richer))))return false; // not better: leave the book as it is
+  const more=add.length>=oldN+Math.max(10,Math.ceil(oldN*0.05)); // clearly more questions saved: better, even with more pages flagged
+  if(prev&&!more&&!(ns.a<os.a||ns.a===os.a&&(lostN<lostO||lostN===lostO&&(add.length>oldN||richer))))return false; // not better: leave the book as it is
   if(add.length<oldN*0.95&&ns.c<=os.c)return false;                        // lost questions without reading more pages: keep the old ones
   const all=[...keep,...add].sort((x,y)=>(x.p||0)-(y.p||0));
   const blocks=[];let cur=[],size=0;const push=()=>{const n=b2.nextChunk++;blocks.push({id:`${b2.id}.${n}`,n,qs:cur});cur=[];size=0};
@@ -7093,8 +7148,9 @@ function viewDepository(){
   if(S.depBook){const b=M.books.get(S.depBook);if(b&&b.dep)return depBookView(b);S.depBook=null}
   const intro=`<div class="stack" style="gap:4px"><div class="spread"><h1>Depository</h1>${checkNowBtn()}</div><p class="muted" style="max-width:72ch">Books wait here until the reader has read every page that holds questions. Their questions are not used in sessions, rounds or statistics. ${Cloud.mode==='gas'?'After each import the reader report and the page text are saved to your Drive folder “MCQ Vault Reader Reports”, where Claude checks them and fixes the reader. Whenever Claude saves a reader fix to that folder, Google’s servers re-read these books by themselves within 15 minutes, even with every device closed: no re-import, no new version.':''} Reader in use: v${READER_VER}.</p></div>`;
   if(!list.length)return intro+`<div class="panel flat empty"><h3>Nothing waiting</h3><p>New imports land here first. Books that read 100% get the badge and a button to add them to your questions.</p><button class="btn pri" data-a="nav" data-v="import">Import a book</button></div>`;
-  return intro+(S.depBusy?`<div class="notice info">Checking “${esc(M.books.get(S.depBusy)?.name||'')}”: ${esc(S.depMsg||'')}</div>`:'')+`<div class="stack">${list.map(b=>{const ok=depReady(b),c=depCounts(b),n=bookQs(b.id).length,miss=depMissed(b),busy=S.depBusy===b.id;
-    return`<div class="panel"><div class="spread"><h3 style="overflow-wrap:anywhere">${esc(b.name)} ${ok?VBADGE:''}${reqPill(b)}</h3><span class="pill ${ok?'ok':'warn'}">${ok?'Ready: reads 100%':'Waiting for reader fix'}</span></div>
+  return intro+(S.ocrSend?`<div class="notice info">Sending the page pictures of “${esc(S.ocrSend.name||'')}”: ${nf(S.ocrSend.k)} of ${nf(S.ocrSend.n)}. Keep the app open until this finishes.</div>`:'')+(S.depBusy?`<div class="notice info">Checking “${esc(M.books.get(S.depBusy)?.name||'')}”: ${esc(S.depMsg||'')}</div>`:'')+`<div class="stack">${list.map(b=>{const ok=depReady(b),c=depCounts(b),n=bookQs(b.id).length,miss=depMissed(b),busy=S.depBusy===b.id;
+    return`<div class="panel"><div class="spread"><h3 style="overflow-wrap:anywhere">${esc(b.name)} ${ok?VBADGE:''}${reqPill(b)}</h3><span class="pill ${ok?'ok':'warn'}">${ok?'Ready: reads 100%':b.dep.ocr&&!n?'Scanned: waiting for the checker':'Waiting for reader fix'}</span></div>
+      ${b.dep.ocr&&!n?`<p class="small" style="max-width:76ch">A scanned book. Google is reading its ${nf(b.dep.ocr.n)} page pictures; then the checker matches each question with the answer printed in the book. You approve the result in Admin, Reports, and the questions appear here.</p>`:''}
       <div class="tiles"><div class="tile ${ok?'ok':''}"><span class="lbl">Book read</span><span class="v">${depPct(b)}</span><span class="s">${nf(c.cov)} of ${nf(c.base)} question ${c.unit||'page'}s · ${nf(n)} of ${nf(n+depLost(b))} questions${c.todo?` · ${nf(c.todo)} ${c.unit||'page'}s not imported yet`:''}</span><span class="covbar"><i style="width:${parseFloat(depPct(b))||0}%"></i></span></div>
         <div class="tile"><span class="lbl">Questions saved</span><span class="v">${nf(n)}</span><span class="s">kept here, not in sessions</span></div>
         <div class="tile ${depLost(b)||c.att?'bad':''}"><span class="lbl">Not saved or not found</span><span class="v">${nf(depLost(b))}</span><span class="s">${nf(miss)} not found · ${nf(c.att)} ${c.unit||'page'}${c.att===1?'':'s'} need attention</span></div></div>
