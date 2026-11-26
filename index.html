@@ -236,6 +236,23 @@ details[open]>summary::before{content:"– "}
 .btn.big{min-height:56px;font-size:1.08rem;width:100%;border-radius:14px}
 .vbadge{display:inline-flex;align-items:center;gap:4px;color:var(--ok);font-size:.75rem;font-weight:800;vertical-align:middle;white-space:nowrap}
 .vbadge svg{flex:none}
+.stylecard.feat{display:block;margin-bottom:10px}
+.stylecard.feat>span{flex-direction:row;align-items:center;gap:14px;padding:14px 16px;border:2px solid var(--accent);background:var(--accent-soft)}
+.stylecard.feat .fic{flex:none;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--accent);color:#fff;font-size:22px}
+.stylecard.feat b{font-size:1.08rem}.stylecard.feat small{font-size:.85rem}
+.stylecard.feat input:checked+span{box-shadow:0 0 0 3px var(--accent-soft),0 2px 10px rgb(0 0 0 / .12)}
+.styhd{margin:2px 0 6px}
+.bbl{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,128px),1fr));gap:8px;max-height:460px;overflow:auto;padding:2px}
+.bbk{position:relative;cursor:pointer;display:block}
+.bbk input{position:absolute;opacity:0;pointer-events:none}
+.bbk>span{display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;padding:10px 8px;border:1.5px solid var(--line);border-radius:12px;background:var(--surface-2);text-align:center}
+.bbk input:checked+span{border:2px solid var(--accent);background:var(--accent-soft)}
+.bbk input:focus-visible+span{outline:2px solid var(--info);outline-offset:2px}
+.bbk .bthumb{width:64px;height:88px}
+.bbk b{font-size:.84rem;line-height:1.25;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.bbbar{display:block;width:100%;height:7px;border-radius:9px;background:var(--line);overflow:hidden}
+.bbbar>i{display:block;height:100%;border-radius:9px;background:var(--ok)}
+.bbk small{color:var(--muted);font-size:.74rem}
 .styles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:8px}
 .stylecard{position:relative;cursor:pointer}
 .stylecard input{position:absolute;opacity:0;pointer-events:none}
@@ -2121,6 +2138,12 @@ const I18N=(()=>{
 "the top 3 results":"أفضل 3 نتائج",
 "Study notes":"ملاحظات الدراسة",
 "Textbook":"كتاب مرجعي",
+"Study by book":"الدراسة حسب الكتاب",
+"Other ways to study":"طرق أخرى للدراسة",
+"{} of {} answered · {}%":"أُجيب عن {1} من {2} · {3}%",
+"Or change to another book":"أو انتقل إلى كتاب آخر",
+"Go on with the chosen book":"تابع بالكتاب المختار",
+"Choose a book first.":"اختر كتابًا أولًا.",
 "Scanned book":"كتاب ممسوح",
 "Scanned: waiting for the checker":"ممسوح: بانتظار المدقق",
 "Scanned books read by the checker":"كتب ممسوحة قرأها المدقق",
@@ -4421,10 +4444,20 @@ document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='gate-
 /* ---- By book (17 Nov): one book, chosen chapters or the whole book; when they are finished, choose new chapters or repeat */
 function bookPickUI(){const bs=libBooks().filter(b=>(M.bookQ.get(b.id)||[]).length).sort((a,b)=>a.name.localeCompare(b.name));
   if(!bs.length)return`<div class="field" data-show="book"><div class="notice info">Your library is empty.</div></div>`;
-  const cur=bs.some(b=>b.id===S.bbBook)?S.bbBook:bs[0].id;S.bbBook=cur;
-  return`<label class="field" data-show="book"><span>Book</span><select id="bb-book">${bs.map(b=>`<option value="${b.id}" ${b.id===cur?'selected':''} data-notr>${esc(b.name)} (${nf((M.bookQ.get(b.id)||[]).length)})</option>`).join('')}</select></label>
-    <div class="field" data-show="book"><span>Chapters</span><div class="tlist" id="bb-chs">${bookChs(cur,'bb',null)}</div>
+  if(!S.bbBook){const m=bbMem();if(m){S.bbBook=m.b;S.bbChs=m.chs}}
+  const cur=bs.some(b=>b.id===S.bbBook)?S.bbBook:bs[0].id;if(cur!==S.bbBook)S.bbChs=null;S.bbBook=cur;
+  const sel=(S.bbChs||[]).filter(i=>bookUn(cur,i).all);
+  return`<div class="field" data-show="book"><span>Book</span><div class="bbl" id="bb-list" role="radiogroup" aria-label="Book">${bs.map(b=>bbCard(b,cur,'bbk')).join('')}</div></div>
+    <div class="field" data-show="book"><span>Chapters</span><div class="tlist" id="bb-chs">${bookChs(cur,'bb',sel.length?sel:null)}</div>
     <p class="muted small">Tick Whole book, or one or more chapters. The number is how many questions of the chapter you have not answered yet.</p></div>`}
+function bbCard(b,cur,nm){const x=bookUn(b.id,null),d=x.all-x.un,pc=x.all?Math.floor(d*100/x.all):0;
+  return`<label class="bbk"><input type="radio" name="${nm}" value="${b.id}" ${b.id===cur?'checked':''}><span>${bookThumb(b)}<b data-notr>${esc(b.name)}</b><span class="bbbar" role="progressbar" aria-valuenow="${pc}" aria-valuemin="0" aria-valuemax="100"><i style="width:${pc}%"></i></span><small>${nf(d)} of ${nf(x.all)} answered · ${pc}%</small></span></label>`}
+// the remembered By-book choice: this account's device storage, else the book of the last By-book session in the synced history
+function bbMem(){const m=S.bbSaved;if(m&&m.b&&M.books.has(m.b))return m;
+  const L=[...M.sessions.values()].filter(s=>s.cf&&s.cf.style==='book').sort((a,b)=>(b.st||0)-(a.st||0));
+  for(const s of L){const bid=(s.cf.books||[])[0]||String((s.cf.topics||[])[0]||'').split('|')[0];if(bid&&M.books.has(bid))return{b:bid,chs:null}}return null}
+function bbSave(){const f=$('#builder'),chs=f?$$('input[name=bbch]:checked',f).map(i=>+i.value):(S.bbChs||[]);S.bbChs=chs;
+  if(!S.bbBook)return;S.bbSaved={b:S.bbBook,chs};kvPut('bb',S.bbSaved)}
 function bookUn(bid,i,skip){let un=0,all=0;for(const id of M.bookQ.get(bid)||[]){const q=M.Q.get(id);if(!q||(i!=null&&q.t!==i))continue;all++;if(!(M.qs.get(id)?.n)&&!(skip&&skip.has(id)))un++}return{un,all}}
 function bookChs(bid,pre,sel){const b=M.books.get(bid);if(!b)return'';const tot=bookUn(bid,null);
   const cnt=x=>x.un?`<span class="muted small"><span>${nf(x.un)}</span> <span>not answered</span></span>`:`<span class="small" style="color:var(--ok)">Finished</span>`;
@@ -4435,7 +4468,7 @@ function bookTick(t,pre){const box=t.closest('.tlist');if(!box)return;
   if(t.name===pre+'w'&&t.checked)$$(`input[name=${pre}ch]`,box).forEach(c=>c.checked=false);
   if(t.name===pre+'ch'){const any=$$(`input[name=${pre}ch]:checked`,box).length;const w=$(`input[name=${pre}w]`,box);if(w)w.checked=!any}}
 function bookScope(bid,chs){return chs&&chs.length?{books:[],topics:chs.map(i=>bid+'|'+i)}:{books:[bid],topics:[]}}
-function bookCfg(f){const bid=$('#bb-book',f)?.value||'',chs=$$('input[name=bbch]:checked',f).map(i=>+i.value);
+function bookCfg(f){const bid=$('input[name=bbk]:checked',f)?.value||S.bbBook||'',chs=$$('input[name=bbch]:checked',f).map(i=>+i.value);
   return{style:'book',book:bid,chs,...bookScope(bid,chs),source:'all',count:Math.max(1,parseInt($('#cfg-count').value)||40),order:'random',
     timing:$('input[name=tim]:checked',f).value,sec:Math.max(5,parseInt($('#cfg-sec').value)||60),min:Math.max(1,parseInt($('#cfg-min').value)||45),feedback:$('input[name=fb]:checked',f).value,qtype:readQt(f)}}
 // this choice's round: the fewest times any of its questions has come up; "finished" = every question has come up the same number of times, at least once
@@ -4444,7 +4477,7 @@ function bookRound(ids,skip){const n=roundOf();let lo=Infinity,hi=0;for(const id
 function bookNote(ids,count){if(!ids.length)return'';const r=bookRound(ids);
   if(r.done)return' · you have finished this choice: Start lets you pick new chapters or repeat it';
   return r.fresh.length<count?` · <span>${nf(r.fresh.length)}</span> <span>left, then you pick new chapters or repeat these</span>`:''}
-async function bookStart(c,again){const ids=buildPool(c);if(!ids.length)return toast('No questions match those choices');
+async function bookStart(c,again){if(c&&c.book&&M.books.has(c.book)){S.bbBook=c.book;S.bbChs=c.chs||[];S.bbSaved={b:c.book,chs:S.bbChs};kvPut('bb',S.bbSaved)}const ids=buildPool(c);if(!ids.length)return toast('No questions match those choices');
   const r=bookRound(ids);if(r.done&&!again)return bookDone(null,c);
   c={...c};delete c.want;delete c.scopeText;if(r.fresh.length<c.count)c.want=c.count;
   return startSession(c,r.fresh)}
@@ -4457,13 +4490,20 @@ function bookDone(A,c){const cf=A?A.cfg:c,bid=cf.book,b=M.books.get(bid);if(!b){
     <div class="row" style="justify-content:flex-end;flex-wrap:wrap;gap:8px">
       <button class="btn" data-ad="bookGo" data-k="end">${A?'End the session here':'Cancel'}</button>
       <button class="btn" data-ad="bookGo" data-k="same">Repeat the same chapters</button>
-      <button class="btn pri" data-ad="bookGo" data-k="new">Go on with the ticked chapters</button></div>`);
+      <button class="btn pri" data-ad="bookGo" data-k="new">Go on with the ticked chapters</button></div>
+    ${(()=>{const ob=libBooks().filter(x=>x.id!==bid&&(M.bookQ.get(x.id)||[]).length).sort((a,b)=>a.name.localeCompare(b.name));return ob.length?`<div id="bn-other" style="margin-top:14px;border-top:1px solid var(--line);padding-top:10px">
+      <p class="small"><b>Or change to another book</b><br><span class="muted">Questions you have not answered come first.</span></p>
+      <div class="bbl" style="max-height:38vh;margin:8px 0" role="radiogroup" aria-label="Book">${ob.map(x=>bbCard(x,'','bnb')).join('')}</div>
+      <div class="row" style="justify-content:flex-end"><button class="btn pri" data-ad="bookGo" data-k="other">Go on with the chosen book</button></div></div>`:''})()}`);
   const w=$('#modal input[name=bnw]');if(w)w.checked=false;
   S.bookAsk={A:!!A,c:A?null:c}}
 async function bookGo(k){const R=S.bookAsk;if(!R)return;const whole=!!$('#modal input[name=bnw]:checked'),chs=$$('#modal input[name=bnch]:checked').map(i=>+i.value);
   if(k==='new'&&!whole&&!chs.length)return toast('Tick Whole book or one or more chapters first.');
+  const nb=k==='other'?$('#modal input[name=bnb]:checked')?.value:'';if(k==='other'&&!nb)return toast('Choose a book first.');
   closeModal();S.bookAsk=null;
+  if(nb){S.bbBook=nb;S.bbChs=[];S.bbSaved={b:nb,chs:[]};kvPut('bb',S.bbSaved)}
   if(!R.A){if(k==='end')return;const c=R.c;if(k==='same')return bookStart(c,true);
+    if(nb)return bookStart({...c,book:nb,chs:[],...bookScope(nb,[])},false);
     return bookStart({...c,chs:whole?[]:chs,...bookScope(c.book,whole?[]:chs)},false)}
   let A=S.active;if(!A)return;const len=A.qids.length;
   await syncActive();while(S.activeBusy)await new Promise(r=>setTimeout(r,50));if(S.active!==A)return;
@@ -4471,17 +4511,17 @@ async function bookGo(k){const R=S.bookAsk;if(!R)return;const whole=!!$('#modal 
     if(A.ans[A.qids[A.idx]]&&A.idx+1<A.qids.length)await nextQ();else render();return}
   if(k==='end'){A.cfg.want=0;await saveActive(A);return finishSession('complete')}
   const have=new Set(A.qids),need=A.cfg.want-A.qids.length,old=sessionScope(A.cfg);
-  let cf=A.cfg;if(k==='new')cf={...A.cfg,chs:whole?[]:chs,...bookScope(A.cfg.book,whole?[]:chs)};
+  let cf=A.cfg;if(k==='new')cf={...A.cfg,chs:whole?[]:chs,...bookScope(A.cfg.book,whole?[]:chs)};if(nb)cf={...A.cfg,book:nb,chs:[],...bookScope(nb,[])};
   const pool=buildPool({...cf,source:'all'});
   const add=(k==='same'?coverOrder(pool.filter(id=>!have.has(id))):shuffle(bookRound(pool,have).fresh)).slice(0,need);
   if(!add.length){ // every question of it is in this session already: end it and start again on the same choice
     const c={...cf};A.cfg.want=0;await saveActive(A);await finishSession('complete');return bookStart(c,true)}
-  if(k==='new'){A.cfg.books=cf.books;A.cfg.topics=cf.topics;A.cfg.chs=cf.chs;A.cfg.scopeText=old+' + '+sessionScope0({...cf,scopeText:''})}
+  if(k==='new'||nb){A.cfg.books=cf.books;A.cfg.topics=cf.topics;A.cfg.chs=cf.chs;A.cfg.book=cf.book;A.cfg.scopeText=old+' + '+sessionScope0({...cf,scopeText:''})}
   A.qids=[...A.qids,...add];if(A.qids.length>=A.cfg.want)A.cfg.want=0;A.cfg.more=(A.cfg.more||0)+1;A.cfg.moreAt=now();
   await saveActive(A);await saveSessionMeta();await nextQ()}
 document.addEventListener('change',e=>{const t=e.target;if(!t)return;
-  if(t.id==='bb-book'){S.bbBook=t.value;const box=$('#bb-chs');if(box)box.innerHTML=bookChs(t.value,'bb',null);return}
-  if(t.name==='bbw'||t.name==='bbch')bookTick(t,'bb');else if(t.name==='bnw'||t.name==='bnch')bookTick(t,'bn')},true);
+  if(t.name==='bbk'){S.bbBook=t.value;const box=$('#bb-chs');if(box)box.innerHTML=bookChs(t.value,'bb',null);bbSave();return}
+  if(t.name==='bbw'||t.name==='bbch'){bookTick(t,'bb');bbSave()}else if(t.name==='bnw'||t.name==='bnch')bookTick(t,'bn')},true);
 document.addEventListener('click',e=>{const el=e.target.closest('[data-ad=bookGo]');if(!el)return;e.preventDefault();e.stopImmediatePropagation();bookGo(el.dataset.k)},true);
 
 /* ---- 17 Nov: opened in a browser: study here, or download the Android app */
@@ -4637,7 +4677,7 @@ async function boot(){
   await IDB.open();
   let dev=await kvGet('dev');if(!dev){dev='d'+rid(5);await kvPut('dev',dev)}S.dev=dev;
   S.devName=(await kvGet('devName'))||guessDevice();
-  S.cur=(await kvGet('cur'))||null;try{S.style=localStorage.getItem('mv-style')||'mingle';S.qtype=localStorage.getItem('mv-qtype')||'both'}catch(e){S.style='mingle';S.qtype='both'}S.lastCheck=(await kvGet('lastCheck'))||null;
+  S.cur=(await kvGet('cur'))||null;try{S.style=localStorage.getItem('mv-style')||'mingle';S.qtype=localStorage.getItem('mv-qtype')||'both'}catch(e){S.style='mingle';S.qtype='both'}S.lastCheck=(await kvGet('lastCheck'))||null;S.bbSaved=(await kvGet('bb'))||null;
   for(const b of (await kvGet('books'))||[])M.books.set(b.id,b);
   for(const [k,c] of await IDB.all('chunks'))M.chunks.set(k,c);
   try{for(const [k,v] of (await kvGet('subc'))||[])SUBC_.set(k,v)}catch(e){}
@@ -4841,7 +4881,7 @@ function viewStudy(){
   </div>
   <form class="panel" id="builder" data-style="${S.style||'mingle'}" onsubmit="return false">
     <h2>New session</h2>
-    <div class="field"><span>Test style</span><div class="styles" role="radiogroup" aria-label="Test style">${STYLES.map(x=>`<label class="stylecard"><input type="radio" name="style" value="${x.k}" data-a="style" ${(S.style||'mingle')===x.k?'checked':''}><span><b>${x.t}</b><small>${x.d}</small></span></label>`).join('')}</div></div>
+    <div class="field" role="radiogroup" aria-label="Test style"><span>Test style</span>${(x=>`<label class="stylecard feat"><input type="radio" name="style" value="${x.k}" data-a="style" ${(S.style||'mingle')===x.k?'checked':''}><span><span class="fic" aria-hidden="true">&#128214;</span><span style="display:flex;flex-direction:column;gap:3px"><b>Study by book</b><small>${x.d}</small></span></span></label>`)(STYLES.find(x=>x.k==='book'))}<p class="muted small styhd">Other ways to study</p><div class="styles">${STYLES.filter(x=>x.k!=='book').map(x=>`<label class="stylecard"><input type="radio" name="style" value="${x.k}" data-a="style" ${(S.style||'mingle')===x.k?'checked':''}><span><b>${x.t}</b><small>${x.d}</small></span></label>`).join('')}</div></div>
     <div class="grid2">
       <div class="stack">
         <div class="field" data-show="custom"><span>Questions from</span>${bookTree('')}</div>
